@@ -60,26 +60,19 @@ source .venv/bin/activate
 
 ## Download model checkpoints 
 ```bash
-cd /path/to/roboreason/
 
 # SOLE-R1 (8B)
+python -c "from roboreason.utils.model_utils import get_model_dir; get_model_dir('sole')"
 
 # Robometer (4B)
-huggingface-cli download robometer/Robometer-4B \
-  --local-dir ./model_checkpoints/Robometer-4B \
-  --local-dir-use-symlinks False
-
-python -c "from roboreason.utils.model_utils import get_model_dir; get_model_dir('roboreward')"
+python -c "from roboreason.utils.model_utils import get_model_dir; get_model_dir('robometer')"
 
 # TOPReward (based on Qwen3-VL-8B)
-huggingface-cli download Qwen/Qwen3-VL-8B-Instruct \
-  --local-dir ./model_checkpoints/Qwen3-VL-8B-Instruct \
-  --local-dir-use-symlinks False
+python -c "from roboreason.utils.model_utils import get_model_dir; get_model_dir('topreward')"
 
 # RoboReward (8B)
-huggingface-cli download teetone/RoboReward-8B \
-  --local-dir ./model_checkpoints/RoboReward-8B \
-  --local-dir-use-symlinks False
+python -c "from roboreason.utils.model_utils import get_model_dir; get_model_dir('roboreward')"
+
 ```
 
 ---
