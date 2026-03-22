@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roboreason"
+version = "0.1.0"
+description = "Roboreason package"
+readme = "README.md"
+requires-python = ">=3.8"
+
+authors = [
+    { name = "Philip" }
+]
+
+dependencies = [
+    # Core ML stack
+    "transformers==4.57.3",
+    "vllm==0.12.0",
+    "wandb>=0.19.1",
+    "pillow",
+    "accelerate>=1.2.1",
+    "qwen_vl_utils",
+    "datasets>=3.2.0",
+    "trl",
+    "imageio",
+    "matplotlib",
+
+    # General utilities
+    "openai",
+    "google-genai",
+]
+
+# Optional dependency groups
+[project.optional-dependencies]
+
+robometer = [
+    "omegaconf>=2.3.0",
+    "hydra-core",
+    "tensorboard",
+    "peft",
+    "codetiming>=1.4.0",
+    "unsloth>=2025.10",
+    "sentence-transformers>=2.0.0",
+    "decord>=0.6.0",
+]
+
+lerobot = [
+    "lerobot",
+    "av",
+]
+
+# Full install (everything)
+all = [
+    "roboreason[robometer,lerobot]"
+]
+
+# -------------------------
+# setuptools config
+# -------------------------
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["roboreason*"]
+
+# -------------------------
+# UV-specific config
+# -------------------------
+[tool.uv]
+
+# This allows PyTorch CUDA wheels
+extra-index-url = [
+    "https://download.pytorch.org/whl/cu116"
+]
+
