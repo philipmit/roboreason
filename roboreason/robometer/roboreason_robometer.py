@@ -174,7 +174,7 @@ def compute_rewards_per_frame_local(
 
 
 
-def robometer(frames_final, task_description):
+def robometer(frames_final, task_description, model_path=None):
     # def robometer(video_path, task_description):
     # frames = load_frames_input(
     #     # str(args.video),
@@ -197,9 +197,14 @@ def robometer(frames_final, task_description):
     #             frames_final.append(frames[i][:, :frames[i].shape[1]//2, :])
     
     # frames_final[0].shape
+    from utils.model_utils import get_model_dir
+    if model_path is None:
+        model_path = get_model_dir("robometer")
+    # 
     rewards, success_probs = compute_rewards_per_frame_local(
         # model_path=args.model_path,
-        model_path='../model_checkpoints/Robometer-4B/',
+        # model_path='../model_checkpoints/Robometer-4B/',
+        model_path=model_path,
         video_frames=np.array(frames_final),
         # task=args.task,
         task=task_description,

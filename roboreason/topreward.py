@@ -386,7 +386,7 @@ def unload_model():
     torch.cuda.ipc_collect()
 
 
-    
+
 backend = None
 
 def topreward(
@@ -399,6 +399,7 @@ def topreward(
     # backend_name: str = "qwen",
     # model: str | None = None,
     verbose: bool = True,
+    model_path: str = None,
 ) -> dict:
     """Compute TOPReward progress estimates for a video trajectory.
 
@@ -424,12 +425,17 @@ def topreward(
             frame_indices:       list[int]    — 0-based prefix endpoint indices
         }
     """
+    from utils.model_utils import get_model_dir
+    if model_path is None:
+        model_path = get_model_dir("topreward")
+    # 
     global backend
     if backend is None:
         # from backends import make_backend
         backend = make_backend(
             "qwen",
-            model="../model_checkpoints/Qwen3-VL-8B-Instruct",
+            # model="../model_checkpoints/Qwen3-VL-8B-Instruct",
+            model=model_path,
             use_chat_template=False,  # always off for TOPReward (see comment above)
         )
 

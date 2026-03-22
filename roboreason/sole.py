@@ -1,4 +1,5 @@
 
+
 import gc
 
 # things for data loader
@@ -12,9 +13,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable, Optional, Sized, Union
 
-# from unittest.mock import patch
-# import deepspeed
-# import megfile
 import numpy as np
 import PIL
 import torch
@@ -23,7 +21,6 @@ import yaml
 from accelerate.utils import broadcast_object_list, gather, gather_object, set_seed
 from datasets import Image, load_dataset, load_from_disk
 from PIL import Image
-# from preprocess_data import get_frames
 from qwen_vl_utils import process_vision_info, smart_resize
 from tqdm import tqdm
 from transformers import (
@@ -31,36 +28,18 @@ from transformers import (
     AutoProcessor,
     Qwen2VLForConditionalGeneration,
 )
-# from trl import GRPOConfig, ModelConfig, TrlParser, get_peft_config
 from trl.data_utils import (
     apply_chat_template,
     is_conversational,
     maybe_apply_chat_template,
 )
+
+import os
+os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 from vllm import LLM, SamplingParams
 
 from transformers import Qwen3VLForConditionalGeneration, AutoProcessor
 
-# Example fine-tuned model.
-# checkpoint_num = 'pnp_q2vl2b_new2_test2_3_v1_from_sft2_checkpoint4000_test1/checkpoint-2500'
-# checkpoint_path = f"/mnt/proj-maple/pschroeder/PR1/new_output/{checkpoint_num}"
-
-# Zero-shot Qwen V1.
-# checkpoint_num = (
-#     "pnp_q2vl2b_new2_test2_3_v1_from_sft2_checkpoint4000_test1/checkpoint-2500"
-# )
-# checkpoint_path = f"/mnt/proj-maple/pschroeder/PR1/new_output/{checkpoint_num}"
-
-# SERL Pick cube GRPO.
-# checkpoint_num = "franka_lift_cube_set1_q2vl2b_new2_test2_3_v1_from_b8sft4000grpo2500/checkpoint-4500"
-# checkpoint_path = f"/mnt/proj-maple/pschroeder/PR1/new_output/{checkpoint_num}"
-
-# Default Qwen.
-# checkpoint_num = "q2vl2b"
-# checkpoint_path = f"/root/qwen-reward-labeler/qwen_reward_labeler/Qwen2-VL-2B-Instruct"
-
-temperature_ = 1.0
-# temperature_ = 0.0
 
 min_pixels = 3136
 max_pixels = 12845056
@@ -74,102 +53,10 @@ system_prompt_template = (
     + "Example output format: <think>[detailed reasoning process]</think><answer>[current task progress]%</answer>"
 )
 
-# user_prompt_template = (
-#     "Here is an image containing multiple camera views of a robot attempting to complete a task. "
-#     + "The views on the left are from the robot's wrist camera. The views on the right are from an external camera. "
-#     + "The views from the previous timestep are shown on the top row. The views from the current timestep are shown on the bottom row. "
-#     + "The task description is: {task_description}. "
-#     + "The task progress for the previous timestep is {prev_progress}%. Predict the task progress for the current timestep."
-# )
-
-
 question_template = "{question}"
 problem_key = "question"
 answer_key = "answer"
 image_key = "image"
-
-
-# def load_model(checkpoint_path: Path, vllm_device: str = "cuda:0", gpu_memory_utilization: float = 0.9):
-#     if "q2vl2b" in checkpoint_path:
-#         model_id = "Qwen/Qwen2-VL-2B-Instruct"
-#     elif "q2vl7b" in checkpoint_path:
-#         model_id = "Qwen/Qwen2-VL-7B-Instruct"
-#     elif "q25vl3b" in checkpoint_path:
-#         model_id = "Qwen/Qwen2.5-VL-3B-Instruct"
-#     elif "q25vl7b" in checkpoint_path:
-#         model_id = "Qwen/Qwen2.5-VL-7B-Instruct"
-#     elif "q3vl2b" in checkpoint_path:
-#         model_id = "Qwen/Qwen3-VL-2B-Instruct"
-#     elif "q3vl4b" in checkpoint_path:
-#         model_id = "Qwen/Qwen3-VL-4B-Instruct"
-#     elif "q3vl8b" in checkpoint_path:
-#         model_id = "Qwen/Qwen3-VL-8B-Instruct"
-#     # 
-#     if model_id in ["Qwen/Qwen2-VL-2B-Instruct"]:
-#         os.system(f"cp /mnt/proj-maple/pschroeder/PR1/new_output/pnp_q2vl2b_new2_test2_3_v1/final/preprocessor_config.json {checkpoint_path}/")
-#     elif model_id in ["Qwen/Qwen2-VL-7B-Instruct"]:
-#         os.system(f"cp /mnt/proj-maple/pschroeder/PR1/new_output/pnp_q2vl7b_new3b_test2_3_v4/final/preprocessor_config.json {checkpoint_path}/")
-#     elif model_id in ["Qwen/Qwen2.5-VL-3B-Instruct"]:
-#         os.system(f"cp /mnt/proj-maple/pschroeder/PR1/new_output/pnp_q25vl3b_new2_test2_3_v2/final/preprocessor_config.json {checkpoint_path}/")
-#     elif model_id in ["Qwen/Qwen2.5-VL-7B-Instruct"]:
-#         os.system(f"cp /mnt/proj-maple/pschroeder/PR1/new_output/pnp_q25vl7b_new2_test2_3_v3/final/preprocessor_config.json {checkpoint_path}/")
-#     elif model_id in ["Qwen/Qwen3-VL-8B-Instruct"]:
-#         # os.system(f"cp /mnt/proj-maple/pschroeder/PR1/new_output/d_0717_1129_2_q3vl8b_sftv2_b48_ga1_lr1e5_eb48_test1/checkpoint-30000/preprocessor_config.json {checkpoint_path}/")
-#         # os.system(f"cp /mnt/proj-maple/pschroeder/PR1/new_output/d_0717_1129b_q3vl8b_sftv2_b48_ga1_lr1e5_eb48_test1/checkpoint-85000/preprocessor_config.json {checkpoint_path}/")
-#         processor = AutoProcessor.from_pretrained(checkpoint_path, fix_mistral_regex=True)
-#         # os.system(f"rm {checkpoint_path}/preprocessor_config.json")
-#         # processor.save_pretrained(f'{checkpoint_path}')
-#         # processor = None
-#     else:
-#         assert False, "need to create preprocessor_config.json for this model"
-#     # 
-#     processing_class = AutoProcessor.from_pretrained(model_id)
-#     pad_token_id = processing_class.tokenizer.pad_token_id
-#     processing_class.pad_token_id = pad_token_id
-#     processing_class.eos_token_id = processing_class.tokenizer.eos_token_id
-#     if "Qwen" in model_id:
-#         processing_class.image_processor.max_pixels = max_pixels
-#         processing_class.image_processor.min_pixels = min_pixels
-    
-#     if 'Qwen3' in model_id:
-#         # The tokenizer you are loading from '/mnt/proj-maple/pschroeder/PR1/new_output/d_0717_1129_2_q3vl8b_sftv2_b48_ga1_lr1e5_eb48_test1/checkpoint-30000' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
-#         processor = AutoProcessor.from_pretrained(checkpoint_path)
-#         # processor
-#         # os.system('rm /mnt/proj-maple/pschroeder/PR1/new_output/d_0717_1129_2_q3vl8b_sftv2_b48_ga1_lr1e5_eb48_test1/checkpoint-30000/preprocessor_config.json')
-#         # os.system('ls /mnt/proj-maple/pschroeder/PR1/new_output/d_0717_1129_2_q3vl8b_sftv2_b48_ga1_lr1e5_eb48_test1/checkpoint-20000/')
-#         # save processor to  
-#         # processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
-#         # processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct", fix_mistral_regex=True)
-#         # processor = AutoProcessor.from_pretrained(checkpoint_path, fix_mistral_regex=True)
-#         # processor.save_pretrained('/mnt/proj-maple/pschroeder/PR1/new_output/d_0717_1129_2_q3vl8b_sftv2_b48_ga1_lr1e5_eb48_test1/checkpoint-30000')
-#     else:
-#         processor = AutoProcessor.from_pretrained(checkpoint_path)
-#     # 
-#     if 'Qwen3' in model_id:
-#         # del llm
-#         llm = LLM(model=checkpoint_path, gpu_memory_utilization=gpu_memory_utilization, enable_prefix_caching=True)
-#         # import vllm
-#         # print(vllm.__version__)
-#         # 0.12.0
-#         # Traceback (most recent call last):
-#         # File "<stdin>", line 1, in <module>
-#         # File "/usr/local/lib/python3.10/dist-packages/vllm/entrypoints/llm.py", line 300, in __init__
-#         #     engine_args = EngineArgs(
-#         # TypeError: EngineArgs.__init__() got an unexpected keyword argument 'device'
-#     else:
-#         llm = LLM(model=checkpoint_path, device=vllm_device, gpu_memory_utilization=gpu_memory_utilization, enable_prefix_caching=True)
-#     # 
-#     sampling_params = SamplingParams(
-#         # temperature=args.temperature,
-#         temperature=temperature_,
-#         top_p=0.9,
-#         top_k=50,
-#         # max_tokens=self.max_completion_length,
-#         max_tokens=200,
-#     )
-#     return llm, processing_class, processor, sampling_params
-
-
 
 def sole_batch_decode(
     processing_class,
@@ -196,15 +83,7 @@ def sole_batch_decode(
         print(f'**************** SOLE-R1 batch decoding for 1 video for {video_step_count} steps ****************')
     else:
         print(f'**************** SOLE-R1 batch decoding across {video_count} videos (in parallel) for {video_step_count} steps ****************')
-    # # assuming no progress prediction for first frame since this will always be 0
-    # video_step_count = video_step_count - 1
-    #
-    # dataset_dict = get_dataset_dict(
-    #     task_description_text,
-    #     batch_vlm_image_wrist_view_file_list_list,
-    #     batch_vlm_image_external_view_file_list_list,
-    # )
-    #
+    # 
     if video_idx_list is None:
         video_idx_list = []
         lev_video_i_start_idx = 0
@@ -215,14 +94,12 @@ def sole_batch_decode(
             lev_video_i_start_idx = video_idx_list_i[-1] + 1
             video_idx_list.append(video_idx_list_i)
         #
-    ############################## batch decoding
     text_output_list_batch = []
     text_input_list_batch = []
     example_list_batch = []
     answer_list_batch = []
     prev_answer_batch = [["0" for x in video_idx_list]]
     sol_list_batch = []
-    # print(prev_answer_batch[-1])
     for video_step in range(video_step_count):
         gc.collect()
         # video_step = 0
@@ -567,13 +444,6 @@ def get_output_across_videos(
 
 
 
-################################################################################################################################################################################################################################################
-
-
-
-
-
-
 
 import json
 import logging
@@ -594,11 +464,6 @@ import cv2
 import torch
 import random
 
-# user_question_template = "Here is an image containing multiple camera views of a robot attempting to complete a task. " + \
-# "The views on the left are from the robot's wrist camera. The views on the right are from an external camera. " + \
-# "The views from the previous timestep are shown on the top row. The views from the current timestep are shown on the bottom row. " + \
-# "The task description is: {task_description}. " + \
-# "The task progress for the previous timestep is {prev_progress}%. Predict the task progress for the current timestep." 
 
 user_question_template = "Here is an image containing multiple camera views of a robot attempting to complete a task. " + \
 "The views on the top are from an external camera. The views on the bottom are from the robot's wrist camera. " + \
@@ -617,12 +482,6 @@ user_question_template_wrist_view = "Here is an image containing multiple camera
 "The task description is: {task_description}. " + \
 "The task progress for the very first timestep is 0%. The task progress for the previous timestep is {prev_progress}%. Predict the task progress for the current timestep." 
 
-
-# question_no_prev_progress_template = "Here is an image containing multiple camera views of a robot attempting to complete a task. " + \
-# "The views on the top are from an external camera. The views on the bottom are from the robot's wrist camera. " + \
-# "The views from the very first timestep are shown to the left. The views from the previous timestep are shown in the middle. The views from the current timestep are shown to the right. " + \
-# "The task description is: {task_description}. " + \
-# "The task progress for the very first timestep is 0%. Predict the task progress for the current timestep." 
 
 user_question_from_zero_template = "Here is an image containing multiple camera views of a robot attempting to complete a task. " + \
 "The views on the top are from an external camera. The views on the bottom are from the robot's wrist camera. " + \
@@ -711,9 +570,6 @@ processing_class = None
 processor = None
 llm = None
 sampling_params = None
-
-
-
 def unload_model():
     import gc, torch
 
@@ -723,59 +579,80 @@ def unload_model():
     gc.collect()
     torch.cuda.empty_cache()
     torch.cuda.ipc_collect()
+
     
-# def unload_model():
+# def load_model():
 #     global processing_class, processor, llm, sampling_params
-#     import gc
-#     import torch
-#     try: 
-#         del processing_class
-#     except:
-#         pass
-#     try:
-#         del processor
-#     except:
-#         pass
-#     try:
-#         del llm
-#     except:
-#         pass
-#     try:
-#         del sampling_params
-#     except:
-#         pass
-#     processing_class = None
-#     processor = None
-#     llm = None
-#     sampling_params = None
+#     if llm is None:
+#         # rbm.unload_model()
+#         print("Loading SOLE-R1 model and processor...")
+#         processing_class = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
+#         # processor = AutoProcessor.from_pretrained("/data/sls/scratch/pschro/sole/checkpoints/checkpoint-85000")
+#         processor = AutoProcessor.from_pretrained("../model_checkpoints/SOLE-R1-8B")
+#         llm = LLM(
+#             # model="/data/sls/scratch/pschro/sole/checkpoints/checkpoint-85000",
+#             model="../model_checkpoints/SOLE-R1-8B",
+#             gpu_memory_utilization=0.95,
+#             max_model_len=16384,
+#             enable_prefix_caching=True,
+#         )
+#         sampling_params = SamplingParams(
+#             temperature=temperature_,
+#             top_p=0.9,
+#             top_k=50,
+#             max_tokens=200,
+#         )
+
+# _llm = None # private global
+
+# def unload_model():
+#     import gc, torch
+
+#     global _llm
+#     _llm = None
+    
 #     gc.collect()
 #     torch.cuda.empty_cache()
 #     torch.cuda.ipc_collect()
-    
-def load_model():
+
+from vllm import LLM, SamplingParams
+
+from transformers import Qwen3VLForConditionalGeneration, AutoProcessor
+temperature_ = 1.0
+
+
+def load_model(model_path: str = None):
+    from utils.model_utils import get_model_dir
+    # 
+    if model_path is None:
+        model_path = get_model_dir("sole")
+    # 
     global processing_class, processor, llm, sampling_params
     if llm is None:
         # rbm.unload_model()
         print("Loading SOLE-R1 model and processor...")
         processing_class = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
         # processor = AutoProcessor.from_pretrained("/data/sls/scratch/pschro/sole/checkpoints/checkpoint-85000")
-        processor = AutoProcessor.from_pretrained("../model_checkpoints/SOLE-R1-8B")
+        # processor = AutoProcessor.from_pretrained("../model_checkpoints/SOLE-R1-8B")
         llm = LLM(
             # model="/data/sls/scratch/pschro/sole/checkpoints/checkpoint-85000",
-            model="../model_checkpoints/SOLE-R1-8B",
+            # model="../model_checkpoints/SOLE-R1-8B",
+            model=model_path,
             gpu_memory_utilization=0.95,
             max_model_len=16384,
             enable_prefix_caching=True,
         )
+        processor = AutoProcessor.from_pretrained(model_path)
         sampling_params = SamplingParams(
             temperature=temperature_,
             top_p=0.9,
             top_k=50,
             max_tokens=200,
         )
-        
 
-def sole(videos, task_description, view_type_per_video=None, context_window = ['current', 'previous', 'first']):
+# load_model()
+
+def sole(videos, task_description, view_type_per_video=None, context_window = ['current', 'previous', 'first'], model_path=None):
     video_step_counts = [len(d) for d in videos]
     if len(set(video_step_counts)) != 1:
         logging.error(
@@ -835,15 +712,7 @@ def sole(videos, task_description, view_type_per_video=None, context_window = ['
                 "question": question_final
             })
     # 
-    # len(dataset_dict_list)
-    # dataset_dict_list[0]['image'].shape
-    # 
-    # gpu_memory_utilization = 0.95
-    # processing_class = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
-    # processor = AutoProcessor.from_pretrained("/data/sls/scratch/pschro/sole/checkpoints/checkpoint-85000")
-    # llm = LLM(model="/data/sls/scratch/pschro/sole/checkpoints/checkpoint-85000", gpu_memory_utilization=0.95, max_model_len=16384,   enable_prefix_caching=True,)
-    # sampling_params = SamplingParams(temperature=temperature_, top_p=0.9, top_k=50,max_tokens=200, ) # max_tokens=self.max_completion_length,
-    load_model()   # ensures model is loaded once
+    load_model(model_path)   # ensures model is loaded once
     global processing_class, processor, llm, sampling_params
     # 
     # test_image = load_image(dataset_dict_list[0]['image'])
@@ -853,12 +722,6 @@ def sole(videos, task_description, view_type_per_video=None, context_window = ['
     # 
     text_output_list_list, text_input_list_list, example_list_list, answer_list_list = get_output_across_videos(video_count, text_input_list_batch, text_output_list_batch, example_list_batch, answer_list_batch )
     # 
-    # [len(x) for x in text_output_list_list]
-    # [len(x) for x in text_input_list_list]
-    # [len(x) for x in example_list_list]
-    # [len(x) for x in answer_list_list]
-    # 
-    # text_output_list_list[0][0]
     # 
     valid_answer_list_list = []
     for episode in answer_list_list:

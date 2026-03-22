@@ -192,17 +192,31 @@ def _parse_score(text: str) -> float:
 #     cap.release()
 #     return frames
 
-model = None
+# model = None
+
+# def unload_model():
+#     import gc, torch
+
+#     for name in ["model"]:
+#         globals()[name] = None
+
+#     gc.collect()
+#     torch.cuda.empty_cache()
+#     torch.cuda.ipc_collect()
+
+_model = None  # private global
 
 def unload_model():
     import gc, torch
 
-    for name in ["model"]:
-        globals()[name] = None
+    global _model
+    _model = None
 
     gc.collect()
     torch.cuda.empty_cache()
     torch.cuda.ipc_collect()
+
+
 
 def roboreward(
     # video_path: str,
@@ -233,9 +247,17 @@ def roboreward(
             frame_indices:   list[int]    — 0-based prefix endpoint indices
         }
     """
-    # global model
-    if model is None:
-        model = RoboRewardModel()
+    # # global model
+    # if model is None:
+    #     model = RoboRewardModel()
+    global _model
+    # 
+    if model is not None:
+        active_model = model
+    else:
+        if _model is None:
+            _model = RoboRewardModel()
+        active_model = _model
 
     # frames = extract_frames(video_path, num_frames)
 
@@ -243,7 +265,7 @@ def roboreward(
     progress_scores = []
 
     for k in range(1, len(frames) + 1):
-        score, raw_output = model.score_frames(frames[:k], instruction)
+        score, raw_output = active_model.score_frames(frames[:k], instruction)
         progress = (score - 1) * 0.25
         progress = progress*100
         raw_scores.append(score)

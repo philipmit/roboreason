@@ -191,7 +191,7 @@ def generate(
         # 
     elif model in ['sole-r1']: 
         from sole import sole
-        rewards, reasoning_traces = sole(downsampled_videos, task_description, view_type_per_video=view_type_per_video, context_window=['current', 'previous', 'first'])
+        rewards, reasoning_traces = sole(downsampled_videos, task_description, view_type_per_video=view_type_per_video, context_window=['current', 'previous', 'first'], model_path=model_path)
         # >>> rewards
         # [[0, 1, 0, 14, 16, 12, 7, 2, 0, -6]]
         # >>> reasoning_traces

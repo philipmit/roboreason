@@ -1,4 +1,5 @@
 
+
 import os
 from pathlib import Path
 from huggingface_hub import snapshot_download
@@ -9,6 +10,7 @@ MODEL_REGISTRY = {
     "roboreward": "teetone/RoboReward-8B",
     "robometer": "robometer/Robometer-4B",
     "topreward": "Qwen/Qwen3-VL-8B-Instruct",
+    "sole": "pschro/SOLE-R1-8B",
 }
 
 
