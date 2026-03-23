@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoProcessor, AutoTokenizer
 
-from robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample, SampleType
+from roboreason.robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample, SampleType
 
 
 class BaseCollator:

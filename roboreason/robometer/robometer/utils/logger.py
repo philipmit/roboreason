@@ -9,7 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 import matplotlib.pyplot as plt
 from loguru import logger as loguru_logger
 
-from robometer.robometer.utils.distributed import get_rank, is_rank_0
+from roboreason.robometer.robometer.utils.distributed import get_rank, is_rank_0
 
 # Define custom log levels for more granular debugging
 # Standard levels: CRITICAL=50, ERROR=40, WARNING=30, INFO=20, DEBUG=10

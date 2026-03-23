@@ -7,8 +7,8 @@ from enum import Enum
 import numpy as np
 import json
 import torch
-from robometer.robometer.utils.distributed import rank_0_print
-from robometer.robometer.data.dataset_types import Trajectory
+from roboreason.robometer.robometer.utils.distributed import rank_0_print
+from roboreason.robometer.robometer.data.dataset_types import Trajectory
 
 
 class DataGenStrat(Enum):

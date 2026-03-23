@@ -2,8 +2,8 @@ from typing import Dict, Any
 
 import numpy as np
 
-from robometer.robometer.data.dataset_types import PreferenceSample, Trajectory
-from robometer.robometer.data.samplers.base import RBMBaseSampler
+from roboreason.robometer.robometer.data.dataset_types import PreferenceSample, Trajectory
+from roboreason.robometer.robometer.data.samplers.base import RBMBaseSampler
 
 
 class BaseQualityPreferenceSampler(RBMBaseSampler):

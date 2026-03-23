@@ -7,14 +7,14 @@ from typing import Dict, List, Optional, Any
 
 import random
 
-from robometer.robometer.data.dataset_types import PreferenceSample, Trajectory
-from robometer.robometer.data.samplers.base import RBMBaseSampler
-from robometer.robometer.data.datasets.helpers import (
+from roboreason.robometer.robometer.data.dataset_types import PreferenceSample, Trajectory
+from roboreason.robometer.robometer.data.samplers.base import RBMBaseSampler
+from roboreason.robometer.robometer.data.datasets.helpers import (
     DataGenStrat,
     convert_continuous_to_discrete_bins,
 )
-from robometer.robometer.utils.logger import get_logger, rank_0_info, trace
-from robometer.robometer.utils.timer import timer
+from roboreason.robometer.robometer.utils.logger import get_logger, rank_0_info, trace
+from roboreason.robometer.robometer.utils.timer import timer
 
 logger = get_logger()
 

@@ -8,9 +8,9 @@ import torch
 from collections import Counter, defaultdict
 from typing import Tuple
 
-from robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample
-from robometer.robometer.data.samplers.base import RBMBaseSampler
-from robometer.robometer.utils.distributed import rank_0_print
+from roboreason.robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample
+from roboreason.robometer.robometer.data.samplers.base import RBMBaseSampler
+from roboreason.robometer.robometer.utils.distributed import rank_0_print
 from sentence_transformers import SentenceTransformer
 
 

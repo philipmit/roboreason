@@ -87,7 +87,7 @@ class ModelConfig(PretrainedConfig):
     rewind: Optional[Dict[str, Any]] = field(default=None)
 
     def __post_init__(self):
-        from robometer.robometer.models.rewind_transformer import ReWINDTransformerConfig
+        from roboreason.robometer.robometer.models.rewind_transformer import ReWINDTransformerConfig
 
         if self.rewind is not None and isinstance(self.rewind, dict):
             # Pass progress_loss_type and progress_discrete_bins from parent config if not set in rewind dict

@@ -37,26 +37,26 @@ except ImportError:
     Qwen3VLForConditionalGeneration = None
     Qwen3VLModel = None
 
-from robometer.robometer.configs.experiment_configs import (
+from roboreason.robometer.robometer.configs.experiment_configs import (
     DataConfig,
     ExperimentConfig,
     ModelConfig,
     PEFTConfig,
     TrainingConfig,
 )
-from robometer.robometer.data.collators import BaseCollator, ReWiNDBatchCollator, RBMBatchCollator
-from robometer.robometer.data.datasets import (
+from roboreason.robometer.robometer.data.collators import BaseCollator, ReWiNDBatchCollator, RBMBatchCollator
+from roboreason.robometer.robometer.data.datasets import (
     RBMDataset,
     StrategyFirstDataset,
     BaseDataset,
     RepeatedDataset,
 )
-from robometer.robometer.data.datasets.custom_eval import CustomEvalDataset
-from robometer.robometer.models import RBM, ReWiNDTransformer, ReWINDTransformerConfig
-from robometer.robometer.utils.logger import get_logger
+from roboreason.robometer.robometer.data.datasets.custom_eval import CustomEvalDataset
+from roboreason.robometer.robometer.models import RBM, ReWiNDTransformer, ReWINDTransformerConfig
+from roboreason.robometer.robometer.utils.logger import get_logger
 
 logger = get_logger()
-from robometer.robometer.utils.save import parse_hf_model_id_and_revision, resolve_checkpoint_path
+from roboreason.robometer.robometer.utils.save import parse_hf_model_id_and_revision, resolve_checkpoint_path
 
 
 def _load_checkpoint_weights_from_safetensors(

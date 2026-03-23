@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any
 
 from hydra.core.config_store import ConfigStore
 
-from robometer.robometer.configs.experiment_configs import CustomEvaluationConfig, DataConfig
+from roboreason.robometer.robometer.configs.experiment_configs import CustomEvaluationConfig, DataConfig
 
 
 @dataclass

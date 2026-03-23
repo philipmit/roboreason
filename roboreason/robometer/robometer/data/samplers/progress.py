@@ -3,15 +3,15 @@ from typing import Dict, Any, Optional
 import random
 import torch
 
-from robometer.robometer.data.dataset_types import ProgressSample, Trajectory
-from robometer.robometer.data.samplers.base import RBMBaseSampler
-from robometer.robometer.data.datasets.helpers import (
+from roboreason.robometer.robometer.data.dataset_types import ProgressSample, Trajectory
+from roboreason.robometer.robometer.data.samplers.base import RBMBaseSampler
+from roboreason.robometer.robometer.data.datasets.helpers import (
     DataGenStrat,
     load_embeddings_from_path,
     convert_continuous_to_discrete_bins,
 )
-from robometer.robometer.utils.distributed import rank_0_print
-from robometer.robometer.utils.logger import get_logger
+from roboreason.robometer.robometer.utils.distributed import rank_0_print
+from roboreason.robometer.robometer.utils.logger import get_logger
 
 logger = get_logger()
 

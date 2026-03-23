@@ -1,3 +1,4 @@
+
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
@@ -25,6 +26,7 @@ dependencies = [
     "trl",
     "imageio",
     "matplotlib",
+    "av>=16.0.0",
 
     # General utilities
     "openai",
@@ -47,14 +49,19 @@ robometer = [
 
 lerobot = [
     "lerobot",
-    "av",
 ]
 
-# Full install (everything)
 all = [
-    "roboreason[robometer,lerobot]"
+    "omegaconf>=2.3.0",
+    "hydra-core",
+    "tensorboard",
+    "peft",
+    "codetiming>=1.4.0",
+    "unsloth>=2025.10",
+    "sentence-transformers>=2.0.0",
+    "decord>=0.6.0",
+    "lerobot",
 ]
-
 # -------------------------
 # setuptools config
 # -------------------------

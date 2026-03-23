@@ -12,10 +12,10 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from robometer.robometer.data.dataset_types import ProgressSample, Trajectory
-from robometer.robometer.data.samplers.base import RBMBaseSampler
-from robometer.robometer.utils.distributed import rank_0_print
-from robometer.robometer.utils.logger import get_logger
+from roboreason.robometer.robometer.data.dataset_types import ProgressSample, Trajectory
+from roboreason.robometer.robometer.data.samplers.base import RBMBaseSampler
+from roboreason.robometer.robometer.utils.distributed import rank_0_print
+from roboreason.robometer.robometer.utils.logger import get_logger
 
 logger = get_logger()
 

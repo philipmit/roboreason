@@ -1,10 +1,10 @@
 import random
 
-from robometer.robometer.data.datasets.base import BaseDataset
-from robometer.robometer.data.samplers.pref import PrefSampler
-from robometer.robometer.data.samplers.progress import ProgressSampler
-from robometer.robometer.data.dataset_category import is_preference_only
-from robometer.robometer.utils.logger import get_logger
+from roboreason.robometer.robometer.data.datasets.base import BaseDataset
+from roboreason.robometer.robometer.data.samplers.pref import PrefSampler
+from roboreason.robometer.robometer.data.samplers.progress import ProgressSampler
+from roboreason.robometer.robometer.data.dataset_category import is_preference_only
+from roboreason.robometer.robometer.utils.logger import get_logger
 
 logger = get_logger()
 

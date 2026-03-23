@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from robometer.robometer.data.dataset_types import ProgressSample, Trajectory
+from roboreason.robometer.robometer.data.dataset_types import ProgressSample, Trajectory
 
-# from robometer.robometer.evals.eval_server import compute_batch_outputs
+# from roboreason.robometer.robometer.evals.eval_server import compute_batch_outputs
 ######## this produces the following messages when running:
 # Skipping import of cpp extensions due to incompatible torch version 2.9.0+cu128 for torchao version 0.16.0             Please see https://github.com/pytorch/ao/issues/2919 for more info
 # /data/sls/scratch/pschro/rr/roboreason/robometer/robometer/utils/setup_utils.py:7: UserWarning: WARNING: Unsloth should be imported before [transformers, peft] to ensure all optimizations are applied. Your code may run slower or encounter memory issues without these optimizations.
@@ -22,19 +22,19 @@ from robometer.robometer.data.dataset_types import ProgressSample, Trajectory
 #   from unsloth import FastVisionModel
 # 🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
 # 🦥 Unsloth Zoo will now patch everything to make training faster!
-# 2026-03-16 13:41:22 | INFO     | [Rank 0] robometer.robometer.evals.eval_server:<module>:62 | robometer.robometer.eval_server logger initialized at level DEBUG
+# 2026-03-16 13:41:22 | INFO     | [Rank 0] roboreason.robometer.robometer.evals.eval_server:<module>:62 | roboreason.robometer.robometer.eval_server logger initialized at level DEBUG
 
 import warnings
 import contextlib
 import io
 warnings.filterwarnings("ignore")
 with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-    from robometer.robometer.evals.eval_server import compute_batch_outputs
+    from roboreason.robometer.robometer.evals.eval_server import compute_batch_outputs
 
 
-# from robometer.robometer.evals.eval_viz_utils import create_combined_progress_success_plot, extract_frames
-from robometer.robometer.utils.save import load_model_from_hf
-from robometer.robometer.utils.setup_utils import setup_batch_collator
+# from roboreason.robometer.robometer.evals.eval_viz_utils import create_combined_progress_success_plot, extract_frames
+from roboreason.robometer.robometer.utils.save import load_model_from_hf
+from roboreason.robometer.robometer.utils.setup_utils import setup_batch_collator
 
 
 reward_model = None
@@ -197,7 +197,7 @@ def robometer(frames_final, task_description, model_path=None):
     #             frames_final.append(frames[i][:, :frames[i].shape[1]//2, :])
     
     # frames_final[0].shape
-    from utils.model_utils import get_model_dir
+    from roboreason.utils.model_utils import get_model_dir
     if model_path is None:
         model_path = get_model_dir("robometer")
     # 
@@ -219,5 +219,6 @@ def robometer(frames_final, task_description, model_path=None):
         rewards = [reward * 100 for reward in rewards]
     # 
     return rewards, success_probs
+
 
 

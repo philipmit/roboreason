@@ -20,10 +20,10 @@ except ImportError:
 from transformers import SmolVLMModel
 import torch.distributed as dist
 
-from robometer.robometer.models.utils import ModelOutput
-from robometer.robometer.models.heads import PredictionHeadsMixin
-from robometer.robometer.utils.timer import _timer
-from robometer.robometer.utils.logger import get_logger
+from roboreason.robometer.robometer.models.utils import ModelOutput
+from roboreason.robometer.robometer.models.heads import PredictionHeadsMixin
+from roboreason.robometer.robometer.utils.timer import _timer
+from roboreason.robometer.robometer.utils.logger import get_logger
 
 logger = get_logger()
 

@@ -13,7 +13,7 @@ from hydra.core.config_store import ConfigStore
 from hydra import main as hydra_main
 
 from peft import prepare_model_for_kbit_training
-from robometer.configs.experiment_configs import (
+from roboreason.robometer.configs.experiment_configs import (
     ExperimentConfig,
     ModelConfig,
     PEFTConfig,
@@ -24,23 +24,23 @@ from robometer.configs.experiment_configs import (
     SaveBestConfig,
     CustomEvaluationConfig,
 )
-from robometer.trainers import ReWiNDTrainer, RBMHeadsTrainer
-from robometer.data.datasets.helpers import show_available_datasets
-from robometer.utils.distributed import is_rank_0
-from robometer.utils.logger import rank_0_info
-from robometer.utils.timer import _timer
-from robometer.utils.save import SaveBestCallback, resolve_checkpoint_path, update_cfg_with_pretrained_ckpt
-from robometer.utils.setup_utils import (
+from roboreason.robometer.trainers import ReWiNDTrainer, RBMHeadsTrainer
+from roboreason.robometer.data.datasets.helpers import show_available_datasets
+from roboreason.robometer.utils.distributed import is_rank_0
+from roboreason.robometer.utils.logger import rank_0_info
+from roboreason.robometer.utils.timer import _timer
+from roboreason.robometer.utils.save import SaveBestCallback, resolve_checkpoint_path, update_cfg_with_pretrained_ckpt
+from roboreason.robometer.utils.setup_utils import (
     create_training_arguments,
     setup_batch_collator,
     setup_dataset,
     setup_model_and_processor,
     setup_peft_model,
 )
-from robometer.data.datasets.base import resolve_dataset_keys
-from robometer.utils.logger import Logger
-from robometer.utils.distributed import banner
-from robometer.utils.config_utils import display_config, convert_hydra_to_dataclass
+from roboreason.robometer.data.datasets.base import resolve_dataset_keys
+from roboreason.robometer.utils.logger import Logger
+from roboreason.robometer.utils.distributed import banner
+from roboreason.robometer.utils.config_utils import display_config, convert_hydra_to_dataclass
 import datasets
 
 datasets.logging.set_verbosity_error()

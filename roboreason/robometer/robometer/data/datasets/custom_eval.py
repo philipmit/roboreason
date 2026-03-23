@@ -2,9 +2,9 @@
 import torch
 from typing import List, Optional
 
-from robometer.robometer.data.datasets.base import BaseDataset
-from robometer.robometer.data.samplers import *
-from robometer.robometer.configs.experiment_configs import DataConfig
+from roboreason.robometer.robometer.data.datasets.base import BaseDataset
+from roboreason.robometer.robometer.data.samplers import *
+from roboreason.robometer.robometer.configs.experiment_configs import DataConfig
 
 
 class CustomEvalDataset(BaseDataset):

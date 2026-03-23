@@ -7,7 +7,7 @@ from typing import TypeVar, Type
 from omegaconf import OmegaConf, DictConfig
 from rich.console import Console
 
-from robometer.robometer.utils.distributed import is_rank_0
+from roboreason.robometer.robometer.utils.distributed import is_rank_0
 
 T = TypeVar("T")
 

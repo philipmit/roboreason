@@ -15,9 +15,9 @@ from huggingface_hub import HfApi, snapshot_download
 from huggingface_hub.utils import HfHubHTTPError
 from peft import PeftModel
 from .upload_to_hub import upload_model_to_hub
-from robometer.robometer.utils.distributed import is_rank_0
-from robometer.robometer.utils.logger import loguru_logger as logger
-from robometer.robometer.configs.experiment_configs import (
+from roboreason.robometer.robometer.utils.distributed import is_rank_0
+from roboreason.robometer.robometer.utils.logger import loguru_logger as logger
+from roboreason.robometer.robometer.configs.experiment_configs import (
     ExperimentConfig,
     ModelConfig,
     LossConfig,
@@ -865,7 +865,7 @@ def load_model_from_hf(
         pass
 
     _ConfigSafeLoader.add_constructor(
-        "tag:yaml.org,2002:python/object:robometer.robometer.models.rewind_transformer.ReWINDTransformerConfig",
+        "tag:yaml.org,2002:python/object:roboreason.robometer.robometer.models.rewind_transformer.ReWINDTransformerConfig",
         lambda loader, node: loader.construct_mapping(node),
     )
 
@@ -877,7 +877,7 @@ def load_model_from_hf(
     exp_config = ExperimentConfig(**filtered_config)
     # Use resolved_path for loading the actual model
     # Import here to avoid circular dependency with setup_utils
-    from robometer.robometer.utils.setup_utils import setup_model_and_processor
+    from roboreason.robometer.robometer.utils.setup_utils import setup_model_and_processor
 
     # Extract PEFT config from the loaded experiment config
     peft_config = exp_config.peft if hasattr(exp_config, "peft") and exp_config.model.use_peft else None

@@ -87,7 +87,7 @@ def log_fsdp_diagnostics(model, accelerator=None, logger=None):
 
     # Import logger if not provided
     if logger is None:
-        from robometer.robometer.utils.logger import get_logger
+        from roboreason.robometer.robometer.utils.logger import get_logger
 
         logger = get_logger()
 

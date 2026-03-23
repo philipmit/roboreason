@@ -12,8 +12,8 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel, AutoConfig, AutoModel
 from transformers import PretrainedConfig
-from robometer.robometer.models.utils import ModelOutput
-from robometer.robometer.models.heads import PredictionHeadsMixin
+from roboreason.robometer.robometer.models.utils import ModelOutput
+from roboreason.robometer.robometer.models.heads import PredictionHeadsMixin
 
 
 def mean_pooling(model_output, attention_mask):

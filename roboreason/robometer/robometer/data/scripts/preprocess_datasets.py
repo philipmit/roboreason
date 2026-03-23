@@ -24,8 +24,8 @@ from transformers import AutoModel, AutoImageProcessor
 from PIL import Image
 
 from datasets import Dataset, DatasetDict, Video, load_dataset
-from robometer.robometer.utils.distributed import rank_0_print
-from robometer.robometer.utils.embedding_utils import compute_video_embeddings, compute_text_embeddings
+from roboreason.robometer.robometer.utils.distributed import rank_0_print
+from roboreason.robometer.robometer.utils.embedding_utils import compute_video_embeddings, compute_text_embeddings
 
 # VIDEO_ERROR_PRINTED = False
 # maps subsets to functions that filter the dataset. If true, the example is dropped.

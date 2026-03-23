@@ -12,11 +12,11 @@ from qwen_vl_utils import process_vision_info
 
 from .base import BaseCollator
 from .utils import convert_frames_to_pil_images, pad_list_to_max, write_mp4
-from robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample
-from robometer.robometer.data.dataset_category import is_preference_only_ds
-from robometer.robometer.data.datasets.helpers import DataGenStrat
+from roboreason.robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample
+from roboreason.robometer.robometer.data.dataset_category import is_preference_only_ds
+from roboreason.robometer.robometer.data.datasets.helpers import DataGenStrat
 from typing import List, Dict, Union
-from robometer.robometer.models.utils import convert_discrete_target_to_continuous
+from roboreason.robometer.robometer.models.utils import convert_discrete_target_to_continuous
 from PIL import Image
 
 MAX_IMAGE_SIDE = 480  # bigger side

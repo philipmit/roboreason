@@ -16,11 +16,11 @@ import numpy as np
 import gymnasium as gym
 import gymnasium.vector as gym_vector
 
-from robometer.robometer.evals.eval_utils import raw_dict_to_sample, extract_rewards_from_output, extract_success_probs_from_output
-from robometer.robometer.evals.eval_server import process_batch_helper
-from robometer.robometer.utils.setup_utils import setup_batch_collator
-from robometer.robometer.utils.tensor_utils import t2n
-from robometer.robometer.utils.save import load_model_from_hf
+from roboreason.robometer.robometer.evals.eval_utils import raw_dict_to_sample, extract_rewards_from_output, extract_success_probs_from_output
+from roboreason.robometer.robometer.evals.eval_server import process_batch_helper
+from roboreason.robometer.robometer.utils.setup_utils import setup_batch_collator
+from roboreason.robometer.robometer.utils.tensor_utils import t2n
+from roboreason.robometer.robometer.utils.save import load_model_from_hf
 
 class GymToGymnasiumWrapper(gym.Env):
     """

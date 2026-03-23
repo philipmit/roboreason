@@ -7,7 +7,7 @@ Provides a mixin class that models can inherit from to get prediction heads.
 import torch
 import torch.nn as nn
 from typing import Optional
-from robometer.robometer.utils.logger import get_logger
+from roboreason.robometer.robometer.utils.logger import get_logger
 
 logger = get_logger()
 

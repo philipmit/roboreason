@@ -22,11 +22,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from robometer.robometer.data.dataset_types import ProgressSample, Trajectory
-from robometer.robometer.evals.eval_server import compute_batch_outputs
-from robometer.robometer.evals.eval_viz_utils import create_combined_progress_success_plot, extract_frames
-from robometer.robometer.utils.save import load_model_from_hf
-from robometer.robometer.utils.setup_utils import setup_batch_collator
+from roboreason.robometer.robometer.data.dataset_types import ProgressSample, Trajectory
+from roboreason.robometer.robometer.evals.eval_server import compute_batch_outputs
+from roboreason.robometer.robometer.evals.eval_viz_utils import create_combined_progress_success_plot, extract_frames
+from roboreason.robometer.robometer.utils.save import load_model_from_hf
+from roboreason.robometer.robometer.utils.setup_utils import setup_batch_collator
 
 
 def load_frames_input(

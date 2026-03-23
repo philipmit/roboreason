@@ -3,9 +3,9 @@ from itertools import cycle
 
 import numpy as np
 from collections import defaultdict
-from robometer.robometer.data.dataset_types import ProgressSample
-from robometer.robometer.data.samplers.base import RBMBaseSampler
-from robometer.robometer.utils.logger import get_logger
+from roboreason.robometer.robometer.data.dataset_types import ProgressSample
+from roboreason.robometer.robometer.data.samplers.base import RBMBaseSampler
+from roboreason.robometer.robometer.utils.logger import get_logger
 
 logger = get_logger()
 

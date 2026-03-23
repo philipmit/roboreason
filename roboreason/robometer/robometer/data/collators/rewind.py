@@ -5,7 +5,7 @@ import torch
 
 from .rbm_heads import RBMBatchCollator
 from .utils import convert_frames_to_pil_images
-from robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample
+from roboreason.robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample
 
 
 class ReWiNDBatchCollator(RBMBatchCollator):

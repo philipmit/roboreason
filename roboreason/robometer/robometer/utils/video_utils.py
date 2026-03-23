@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from robometer.robometer.data.datasets.helpers import load_frames_from_npz
+from roboreason.robometer.robometer.data.datasets.helpers import load_frames_from_npz
 
 
 def extract_frames_from_video(video_path: str, fps: int = 1) -> np.ndarray:

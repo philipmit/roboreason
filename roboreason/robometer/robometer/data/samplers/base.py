@@ -7,8 +7,8 @@ import torch
 from random import Random
 from datasets import Dataset
 
-from robometer.robometer.configs.experiment_configs import DataConfig
-from robometer.robometer.data.datasets.helpers import (
+from roboreason.robometer.robometer.configs.experiment_configs import DataConfig
+from roboreason.robometer.robometer.data.datasets.helpers import (
     load_frames_from_npz,
     get_segment_indices_with_middle,
     compute_progress_from_segment,
@@ -20,9 +20,9 @@ from robometer.robometer.data.datasets.helpers import (
     linspace_subsample_frames,
     convert_continuous_to_discrete_bins,
 )
-from robometer.robometer.data.dataset_types import Trajectory
-from robometer.robometer.utils.logger import get_logger
-from robometer.robometer.data.dataset_category import is_preference_only_ds
+from roboreason.robometer.robometer.data.dataset_types import Trajectory
+from roboreason.robometer.robometer.utils.logger import get_logger
+from roboreason.robometer.robometer.data.dataset_category import is_preference_only_ds
 
 logger = get_logger()
 

@@ -2,8 +2,8 @@ from typing import Dict, List, Any
 
 from tqdm import tqdm
 
-from robometer.robometer.data.samplers.eval.base_pref import BaseQualityPreferenceSampler
-from robometer.robometer.utils.distributed import rank_0_print
+from roboreason.robometer.robometer.data.samplers.eval.base_pref import BaseQualityPreferenceSampler
+from roboreason.robometer.robometer.utils.distributed import rank_0_print
 
 
 class RoboArenaQualityPreferenceSampler(BaseQualityPreferenceSampler):

@@ -49,7 +49,7 @@ class RoboRewardModel:
 
     # def __init__(self, model_name: str = ROBOREWARD_MODEL, max_new_tokens: int = 128):
     def __init__(self, model_name: str = None, max_new_tokens: int = 128):
-        from utils.model_utils import get_model_dir
+        from roboreason.utils.model_utils import get_model_dir
 
         if model_name is None:
             model_name = get_model_dir("roboreward")

@@ -15,8 +15,8 @@ import numpy as np
 import requests
 import torch
 
-from robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample, Trajectory
-from robometer.robometer.data.datasets.helpers import linspace_subsample_frames, pad_trajectory_to_max_frames_np
+from roboreason.robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample, Trajectory
+from roboreason.robometer.robometer.data.datasets.helpers import linspace_subsample_frames, pad_trajectory_to_max_frames_np
 
 
 def extract_rewards_from_output(outputs: Dict[str, Any]) -> np.ndarray:

@@ -43,18 +43,18 @@ from hydra import main as hydra_main
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from robometer.robometer.evals.eval_utils import (
+from roboreason.robometer.robometer.evals.eval_utils import (
     parse_npy_form_data,
     reconstruct_payload_from_npy,
 )
-from robometer.robometer.utils.save import load_model_from_hf
-from robometer.robometer.configs.eval_configs import EvalServerConfig
-from robometer.robometer.configs.experiment_configs import ExperimentConfig
-from robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample
-from robometer.robometer.utils.setup_utils import setup_model_and_processor, setup_batch_collator
-from robometer.robometer.models.utils import ModelOutput, convert_bins_to_continuous, convert_bins_to_continuous_hard
-from robometer.robometer.utils.config_utils import display_config, convert_hydra_to_dataclass
-from robometer.robometer.utils.logger import get_logger, setup_loguru_logging
+from roboreason.robometer.robometer.utils.save import load_model_from_hf
+from roboreason.robometer.robometer.configs.eval_configs import EvalServerConfig
+from roboreason.robometer.robometer.configs.experiment_configs import ExperimentConfig
+from roboreason.robometer.robometer.data.dataset_types import PreferenceSample, ProgressSample
+from roboreason.robometer.robometer.utils.setup_utils import setup_model_and_processor, setup_batch_collator
+from roboreason.robometer.robometer.models.utils import ModelOutput, convert_bins_to_continuous, convert_bins_to_continuous_hard
+from roboreason.robometer.robometer.utils.config_utils import display_config, convert_hydra_to_dataclass
+from roboreason.robometer.robometer.utils.logger import get_logger, setup_loguru_logging
 
 # LOG_LEVEL = "DEBUG"
 # setup_loguru_logging(log_level=LOG_LEVEL)
@@ -771,7 +771,7 @@ def create_app(cfg: EvalServerConfig, multi_gpu_server: MultiGPUEvalServer | Non
 def main(cfg: DictConfig):
     LOG_LEVEL = "DEBUG"
     setup_loguru_logging(log_level=LOG_LEVEL)
-    logger.info(f"robometer.robometer.eval_server logger initialized at level {LOG_LEVEL}")
+    logger.info(f"roboreason.robometer.robometer.eval_server logger initialized at level {LOG_LEVEL}")
     # 
     """Main entry point for evaluation server using Hydra configuration."""
     # Convert Hydra config to dataclass

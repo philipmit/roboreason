@@ -60,19 +60,19 @@ def generate(
             print(f"Unloading previous model {CURRENT_MODEL} from GPU to free up memory...")
             # 
             if CURRENT_MODEL == "robometer":
-                from robometer.roboreason_robometer import unload_model as unload_robometer
+                from roboreason.robometer.roboreason_robometer import unload_model as unload_robometer
                 unload_robometer()
             # 
             elif CURRENT_MODEL == "sole-r1":
-                from sole import unload_model as unload_sole
+                from roboreason.sole import unload_model as unload_sole
                 unload_sole()
             # 
             elif CURRENT_MODEL == "roboreward":
-                from roboreward import unload_model as unload_roboreward
+                from roboreason.roboreward import unload_model as unload_roboreward
                 unload_roboreward()
             # 
             elif CURRENT_MODEL == "topreward":
-                from topreward import unload_model as unload_topreward
+                from roboreason.topreward import unload_model as unload_topreward
                 unload_topreward()
             import gc
             import torch
@@ -181,7 +181,7 @@ def generate(
     full_reasoning_traces = None
     if 'gpt' in model or 'gemini' in model:
         # 
-        from api_models import api_models
+        from roboreason.api_models import api_models
         rewards = []
         reasoning_traces = []
         for video_idx in range(len(downsampled_videos)):
@@ -190,7 +190,9 @@ def generate(
             reasoning_traces.append(reasoning_traces_video_i)
         # 
     elif model in ['sole-r1']: 
-        from sole import sole
+        from roboreason.sole import sole
+        # from sole import load_model
+        # load_model()
         rewards, reasoning_traces = sole(downsampled_videos, task_description, view_type_per_video=view_type_per_video, context_window=['current', 'previous', 'first'], model_path=model_path)
         # >>> rewards
         # [[0, 1, 0, 14, 16, 12, 7, 2, 0, -6]]
@@ -202,14 +204,14 @@ def generate(
         # [['', "<think>At the previous timestep, the gripper was hovering farther from the red cube with a noticeable gap and no contact. At the current timestep, the arm has moved closer and slightly lower toward the cube, while the cube remains on the table and the gripper still hasn't touched it. Given the previous progress of 0%, this small approach indicates increasing progress; I would predict the current progress to be about 2%. To finish the task, the robot must align over the cube, close the gripper to grasp it, and lift it off the table.</think><answer>2%</answer>", '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved closer to the cube compared to the previous timestep. Therefore, the task progress appears to be increasing. Given that the previous task progress was 2%, the current task progress seems to have increased to 3%.</think><answer>3%</answer>', '<think>At the previous timestep, the gripper was hovering above the table with the cube clearly visible below and some lateral offset from it. At the current timestep, the gripper has moved closer toward the cube and appears better aligned above it, but it is still open and has not made contact or lifted the cube. This approach indicates increasing progress relative to the previous timestep; given the earlier estimate of 3%, the observed closing of the distance and improved alignment suggests the current progress is likely around 15%. To complete the task, the robot still needs to finish positioning directly over the cube, descend to an appropriate grasp pose, close the gripper to secure the cube, and then lift it from the table.</think><answer>15%</answer>', '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved closer to the cube compared to the previous timestep. Therefore, the task progress appears to be increasing. Given that the previous task progress was 15%, the current task progress seems to have increased to 17%.</think><answer>17%</answer>', '<think>In the previous timestep, the gripper is hovering above the table with the cube clearly on the surface, and there is no contact. In the current timestep, the gripper has moved slightly farther away from the cube and remains open, so it is less aligned for a grasp than before. Given that the previous task progress was 17%, this increased distance suggests a small setback; I would predict the current progress to be about 16%. To complete the task, the robot still needs to re-approach the cube, align the gripper around it, close to secure a grasp, and then lift it from the table.</think><answer>16%</answer>', '<think>At the previous timestep, the gripper hovered over the table near the cube with the fingers open and no contact. At the current timestep, the arm has rotated and shifted slightly away from the cube, increasing the distance and still not making contact. Because the end effector moved farther from the target, progress toward picking up the cube is likely decreasing; given a previous progress of 16%, I would predict the current progress to be around 9%. To complete the task, the robot needs to re-approach the cube, align above it, close the gripper to secure it, and lift it off the table.</think><answer>9%</answer>', '<think>In the previous timestep, the gripper was positioned closer to the cube on the table and roughly aligned for an approach, but it had not made contact. In the current timestep, the gripper has rotated and moved farther from the cube, increasing the gap and still showing no grasp. Because the end-effector is retreating rather than closing in, the task appears to be regressing; given a previous progress of 9%, I would predict the current progress to be around 2%. To complete the task, the robot needs to re-approach the cube, align the gripper above it, descend, close the fingers to secure the cube, and lift it off the table.</think><answer>2%</answer>', '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved further from the cube compared to the previous timestep. Therefore, the task progress appears to be decreasing. Given that the previous task progress was 2%, the current task progress seems to have decreased to -1%.</think><answer>-1%</answer>', '<think>At the previous timestep, the open gripper hovered near the cube on the table without making contact. At the current timestep, the arm has shifted slightly away from the cube, increasing the distance, and the gripper remains open with no contact. Because the end-effector is moving farther from the target instead of approaching or grasping it, progress is decreasing; given the previous progress of -1%, I would predict the current progress to be around -7%. To complete the task, the robot needs to move back toward the cube, align the gripper around it, close to secure a grasp, and lift it off the table.</think><answer>-7%</answer>']]
     # 
     elif model in ['topreward']:
-        from topreward import topreward
+        from roboreason.topreward import topreward
         rewards = []
         for video_idx in range(len(downsampled_videos)):
-            rewards_video_i = topreward(downsampled_videos[video_idx], task_description)
+            rewards_video_i = topreward(downsampled_videos[video_idx], task_description, model_path=model_path)
             rewards.append(rewards_video_i)
     # 
     elif model in ['roboreward']:
-        from roboreward import roboreward, RoboRewardModel
+        from roboreason.roboreward import roboreward, RoboRewardModel
         rewards = []
         for video_idx in range(len(downsampled_videos)):
             if model_path is None:
@@ -218,26 +220,15 @@ def generate(
                 rewards_video_i = roboreward(downsampled_videos[video_idx], task_description, model=RoboRewardModel(model_name=model_path))
             rewards.append(rewards_video_i)
     # 
-    elif model in ['roboreward']:
-        from roboreward import roboreward, RoboRewardModel
-        # 
-        rewards = []
-        for video_idx in range(len(downsampled_videos)):
-            rewards_video_i = roboreward(
-                downsampled_videos[video_idx],
-                task_description,
-                model=RoboRewardModel(model_name=model_path) if model_path else None
-            )
-            rewards.append(rewards_video_i)
     elif model in ['robometer']:
-        from robometer.roboreason_robometer import robometer
+        from roboreason.robometer.roboreason_robometer import robometer
         # 
         rewards = []
         success_probs = []
         # for video_path in video_paths:
         for video_idx in range(len(downsampled_videos)):
             # rewards_video_i, success_probs_video_i = robometer(video_path, task_description)
-            rewards_video_i, success_probs_video_i = robometer(downsampled_videos[video_idx], task_description)
+            rewards_video_i, success_probs_video_i = robometer(downsampled_videos[video_idx], task_description, model_path=model_path)
             rewards.append(rewards_video_i)
             success_probs.append(success_probs_video_i)
     # 
