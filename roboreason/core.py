@@ -39,6 +39,8 @@ def generate(
     ######
     ###### optionl, in case you want to give frames instead of video paths
     video_frames: list = None,
+    video_frames_external: list = None,
+    video_frames_wrist: list = None,
     ######
     view_type_per_video: list = None,
     view_type: str = None,
@@ -86,7 +88,24 @@ def generate(
         assert key is not None, 'API key must be provided for OpenAI and Google models'
     # 
     single_video = False
-    if video_frames is None:
+    if video_frames is not None:
+        # if video_frames[0] is a list of frames, then we have multiple videos worth of frames. if video_frames is a single list of frames, then we have one video worth of frames.
+        if isinstance(video_frames[0], list):
+            single_video = False
+        else:
+            single_video = True
+    elif video_frames_external is not None or video_frames_wrist is not None:
+        if video_frames_external is not None:
+            if isinstance(video_frames_external[0], list):
+                single_video = False
+            else:
+                single_video = True
+        if video_frames_wrist is not None:
+            if isinstance(video_frames_wrist[0], list):
+                single_video = False
+            else:
+                single_video = True
+    else:
         if video_paths is None and video_path is not None:
             video_paths = [video_path]
             single_video = True
@@ -104,16 +123,48 @@ def generate(
             # 
             if view_type_per_video is None and view_type is not None:
                 view_type_per_video = [view_type] * max([len(video_view_external_paths or []), len(video_view_wrist_paths or [])])
-        # 
-    else:
-        # if video_frames[0] is a list of frames, then we have multiple videos worth of frames. if video_frames is a single list of frames, then we have one video worth of frames.
-        if isinstance(video_frames[0], list):
-            single_video = False
-        else:
-            single_video = True
+    # 
     ############ EXTRACT VIDEO FRAMES FOR ALL VIDEOS AS A LIST OF LISTS    
     # 
-    if video_frames is None:
+    if video_frames is not None:
+        if single_video:
+            videos = [video_frames]
+        else:
+            videos = video_frames
+    elif video_frames_external is not None or video_frames_wrist is not None:
+        if video_frames_external is not None and video_frames_wrist is not None:
+            if single_video:
+                video_frames_external = [video_frames_external]
+                video_frames_wrist = [video_frames_wrist]
+            # 
+            if len(video_frames_external) != len(video_frames_wrist):
+                raise ValueError(f"Number of videos in video_frames_external {len(video_frames_external)} does not match number of videos in video_frames_wrist {len(video_frames_wrist)}")
+            # 
+            videos = []
+            for video_idx in range(len(video_frames_external)):
+                frames_external = video_frames_external[video_idx]
+                frames_wrist = video_frames_wrist[video_idx]
+                if not len(frames_external) == len(frames_wrist):
+                    raise ValueError(f"Number of frames in external view video {len(frames_external)} does not match number of frames in wrist view video {len(frames_wrist)} for video_idx {video_idx}")
+                frames_combined = [np.concatenate((frames_external[i], frames_wrist[i]), axis=1) for i in range(len(frames_external))]
+                videos.append(frames_combined)
+            view_type_per_video = ['external and wrist'] * len(videos)
+        else:
+            if video_frames_external is not None and video_frames_wrist is None:
+                if single_video:
+                    video_frames_external = [video_frames_external]
+                videos = video_frames_external
+                view_type_per_video = ['external'] * len(video_frames_external)
+                print(f"Using videos from video_frames_external with view type 'external'")
+            elif video_frames_external is None and video_frames_wrist is not None:
+                if single_video:
+                    video_frames_wrist = [video_frames_wrist]
+                videos = video_frames_wrist
+                view_type_per_video = ['wrist'] * len(video_frames_wrist)
+                print(f"Using videos from video_frames_wrist with view type 'wrist'")
+            else:
+                raise ValueError("video_frames cannot be None if video_paths is None")
+    else:
         if video_paths is None and video_view_external_paths is not None and video_view_wrist_paths is not None:
             # concatenate external and wrist view videos side by side and use that as input to the model 
             videos = []
@@ -141,11 +192,6 @@ def generate(
             for video_path in video_paths:
                 frames = load_video_frames(video_path)
                 videos.append(frames)
-    else:
-        if single_video:
-            videos = [video_frames]
-        else:
-            videos = video_frames
     # 
     ############ DOWNSAMPLE TO NUM_REASONING_FRAMES (e.g. 10) REASONING FRAMES PER VIDEO
     downsampled_videos = []
