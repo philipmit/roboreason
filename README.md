@@ -8,9 +8,16 @@
 
 </div>
 
+## Supported Models
+- Robometer (https://robometer.github.io)
+- TOPReward (https://topreward.github.io/webpage/)
+- RoboReward (https://arxiv.org/abs/2601.00675)
+- SOLE-R1 (https://philipmit.github.io/sole-r1/)
+- OpenAI models (e.g., `"gpt-5"`)
+- Google models (e.g., `"gemini-3-pro-preview"`)
+
 ## ToDos
 - [ ] Enable fine-tuning of reward models on custom datasets
-
 
 ## 📦 File Structure
 
@@ -84,13 +91,13 @@ import roboreason as rr
 video_paths = ['../test_videos/robosuite/robosuite_lift_example_00.mp4']
 task_description="Pick up the cube from the table."
 
-# SOLE-R1
-rewards, reasoning_traces = rr.generate(model="sole-r1",  task_description=task_description, video_paths=video_paths, view_type_per_video=['external and wrist'])
-output_sole = {"model": "sole-r1", "rewards": rewards[0], "reasoning_traces": reasoning_traces[0]}
-
 # Robometer
 rewards, success_probs = rr.generate(model="robometer",  task_description=task_description, video_paths=video_paths, view_type_per_video=['external'])
 output_robometer = {"model": "robometer", "rewards": rewards[0]}
+
+# SOLE-R1
+rewards, reasoning_traces = rr.generate(model="sole-r1",  task_description=task_description, video_paths=video_paths, view_type_per_video=['external and wrist'])
+output_sole = {"model": "sole-r1", "rewards": rewards[0], "reasoning_traces": reasoning_traces[0]}
 
 rr.video_plot(outputs=[output_sole, output_robometer], plot_save_path='../model_outputs/combined/robosuite_lift_example_00.mp4', video_path = video_paths[0])
 
@@ -98,18 +105,6 @@ rr.video_plot(outputs=[output_sole, output_robometer], plot_save_path='../model_
 
 ---
 ## Examples for generating across all models
-### SOLE-R1
-```python
-
-import roboreason as rr
-
-rewards, reasoning_traces = rr.generate(
-    model="sole-r1",  
-    task_description="Pick up the cube from the table.", 
-    video_paths=['../test_videos/robosuite/robosuite_lift_example_00.mp4'], 
-    view_type_per_video=['external and wrist']
-)
-```
 
 ### Robometer
 ```python
@@ -124,6 +119,20 @@ rewards, success_probs = rr.generate(
 )
 
 ```
+
+### SOLE-R1
+```python
+
+import roboreason as rr
+
+rewards, reasoning_traces = rr.generate(
+    model="sole-r1",  
+    task_description="Pick up the cube from the table.", 
+    video_paths=['../test_videos/robosuite/robosuite_lift_example_00.mp4'], 
+    view_type_per_video=['external and wrist']
+)
+```
+
 
 ### TOPReward
 ```python
@@ -192,13 +201,13 @@ rewards, reasoning_traces = rr.generate(
 
 import roboreason as rr
 
-# SOLE-R1
-rewards, reasoning_traces = rr.generate(model="sole-r1",  task_description=task_description, video_paths=video_paths, view_type_per_video=['external and wrist'])
-output_sole = {"model": "sole-r1", "rewards": rewards[0], "reasoning_traces": reasoning_traces[0]}
-
 # Robometer
 rewards, success_probs = rr.generate(model="robometer",  task_description=task_description, video_paths=video_paths, view_type_per_video=['external'])
 output_robometer = {"model": "robometer", "rewards": rewards[0]}
+
+# SOLE-R1
+rewards, reasoning_traces = rr.generate(model="sole-r1",  task_description=task_description, video_paths=video_paths, view_type_per_video=['external and wrist'])
+output_sole = {"model": "sole-r1", "rewards": rewards[0], "reasoning_traces": reasoning_traces[0]}
 
 rr.video_plot(
     outputs=[output_sole, output_robometer], 
@@ -215,7 +224,7 @@ rr.video_plot(
 
 | Argument              | Type        | Required | Description                                                                                                                                    |
 | --------------------- | ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `model`               | `str`       | ✅        | Name of the model to use. Options include: `"sole-r1"`, `"robometer"`, `"topreward"`, `"roboreward"`, OpenAI models (e.g.`"gpt-5"`), Google models (e.g., `"gemini-3-pro-preview"`) |
+| `model`               | `str`       | ✅        | Name of the model to use. Options include: `"robometer"`, `"sole-r1"`, `"topreward"`, `"roboreward"`, OpenAI models (e.g.`"gpt-5"`), Google models (e.g., `"gemini-3-pro-preview"`) |
 | `task_description`    | `str`       | ✅        | Natural language description of the task the robot is performing.                                                                              |
 | `video_paths`         | `List[str]` | ✅        | List of paths to input video files.                                                                                                            |
 | `view_type_per_video` | `List[str]` | ✅        | List specifying the camera view(s) used for reward reasoning for each video (e.g., `"external"`, `"wrist"`, or `"external and wrist"`).                                  |
