@@ -13,7 +13,7 @@ task_description="Pick up the cube from the table and place it at the target loc
 
 # NOTE: SOLE-R1 is fastest, but all methods are slow with large datasets
 
-# uses lerobot add_features function to add reward annotations to the dataset, stored in the with_reward sub-directory
+# uses lerobot add_features function to add reward annotations to the dataset, stored in the '/with_reward' sub-directory
 rr.annotate(model="robometer", lerobot_dataset=dataset, observation_name="observation.images.side", annotation_version="v1", task_description=task_description, num_reasoning_frames=10)
 rr.annotate(model="sole-r1", lerobot_dataset=dataset, observation_name="observation.images.side", annotation_version="v1", task_description=task_description,  num_reasoning_frames=10)
 rr.annotate(model="roboreward", lerobot_dataset=dataset, observation_name="observation.images.side", annotation_version="v1", task_description=task_description, num_reasoning_frames=10)
@@ -55,7 +55,28 @@ for video_idx in range(len(video_frames)):
 ```
 
 
+## Reading the saved rewards as pandas df
+```python
+import os
+import pandas as pd
+parquet_path = os.path.join(dataset.root / "with_reward" , "data/chunk-000/file-000.parquet")
+df = pd.read_parquet(parquet_path)
+md_table = df.head(10).to_markdown(index=False)
+>>> print(md_table)
+| action                                                              | observation.state                                                   |   timestamp |   frame_index |   episode_index |   index |   task_index |   rewards_robometer_v1 |   rewards_sole-r1_v1 |   rewards_roboreward_v1 |   rewards_topreward_v1 |
+|:--------------------------------------------------------------------|:--------------------------------------------------------------------|------------:|--------------:|----------------:|--------:|-------------:|-----------------------:|---------------------:|------------------------:|-----------------------:|
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -97.12963   97.00449   86.924034 -23.157345  38.10764 ] |   0         |             0 |               0 |       0 |            0 |                14.1052 |             0        |                       0 |                0       |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -97.12963   97.00449   86.924034 -23.157345  38.10764 ] |   0.0333333 |             1 |               0 |       1 |            0 |                14.292  |             0.205128 |                       0 |                2.4536  |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -96.94444   97.20419   86.176834 -23.575537  38.10764 ] |   0.0666667 |             2 |               0 |       2 |            0 |                14.4788 |             0.410256 |                       0 |                4.9072  |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -96.01852   97.60359   83.93524  -24.202824  38.10764 ] |   0.1       |             3 |               0 |       3 |            0 |                14.6657 |             0.615385 |                       0 |                7.3608  |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -95.833336  97.60359   80.69739  -24.202824  38.10764 ] |   0.133333  |             4 |               0 |       4 |            0 |                14.8525 |             0.820513 |                       0 |                9.81441 |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -96.57407   97.60359   79.20299  -24.202824  38.10764 ] |   0.166667  |             5 |               0 |       5 |            0 |                15.0394 |             1.02564  |                       0 |               12.268   |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -96.296295  97.60359   78.45579  -24.202824  38.10764 ] |   0.2       |             6 |               0 |       6 |            0 |                15.2262 |             1.23077  |                       0 |               14.7216  |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -95.74074   97.60359   77.95766  -24.202824  38.10764 ] |   0.233333  |             7 |               0 |       7 |            0 |                15.413  |             1.4359   |                       0 |               17.1752  |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -95.64815   97.60359   77.58406  -24.202824  38.10764 ] |   0.266667  |             8 |               0 |       8 |            0 |                15.5999 |             1.64103  |                       0 |               19.6288  |
+| [ 45.85219  -96.01361  100.        76.41357  -24.210526  38.436745] | [ 45.420906 -95.92593   97.60359   77.33499  -24.202824  38.10764 ] |   0.3       |             9 |               0 |       9 |            0 |                15.7867 |             1.84615  |                       0 |               22.0824  |
 
+```
 
 
 
