@@ -240,6 +240,8 @@ def generate(
         rewards = []
         reasoning_traces = []
         for video_idx in range(len(downsampled_videos)):
+            if verbose: 
+                print(f"Generating rewards for video {video_idx+1}/{len(downsampled_videos)} using {model}...")
             rewards_video_i, reasoning_traces_video_i = api_models(model, downsampled_videos[video_idx], task_description, key)
             rewards.append(rewards_video_i)
             reasoning_traces.append(reasoning_traces_video_i)

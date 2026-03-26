@@ -23,7 +23,7 @@ def image_to_base64(img):
 
 
 user_prompt_template_gemini = (
-    "Here is an image containing multiple camera views of a robot attempting to complete a task. "
+    "Here are images containing multiple camera views of a robot attempting to complete a task. "
     + "The first image is from the previous timestep. The second image is from the current timestep. "
     + "The task description is: {task_description}. "
     + "The predicted task progress for the previous timestep was {prev_progress}%. Predict the task progress for the current timestep. "
@@ -36,7 +36,7 @@ user_prompt_template_gemini = (
 )
 
 user_prompt_template_gpt = (
-    "Here is an image containing multiple camera views of a robot attempting to complete a task. "
+    "Here are images containing multiple camera views of a robot attempting to complete a task. "
     + "The first image is from the previous timestep. The second image is from the current timestep. "
     + "The task description is: {task_description}. "
     + "The predicted task progress for the previous timestep was {prev_progress}%. Predict the task progress for the current timestep. "
