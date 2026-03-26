@@ -31,6 +31,7 @@ roboreason/
 │   └── api_models.py      # OpenAI and Gemini APIs
 ├── test_videos/        # Example videos to test
 ├── model_outputs/      # Videos showing model outputs
+├── lerobot_examples/   # Examples showing integration with lerobot datasets
 └── pyproject.toml      # Dependencies (uv)
 ```
 

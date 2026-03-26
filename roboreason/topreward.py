@@ -465,6 +465,7 @@ def topreward(
         
     # multiply by 100
     # dense = [d*100 for d in dense]
+    normalized_scaled = [x*100 for x in normalized]
 
     # return {
     #     "raw_log_probs": raw_log_probs,
@@ -472,7 +473,7 @@ def topreward(
     #     "dense_rewards": dense,
     #     "frame_indices": list(range(len(frames))),
     # }
-    return dense
+    return normalized_scaled
     
 
 

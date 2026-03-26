@@ -76,12 +76,14 @@ def sole_batch_decode(
     dropout_100=False,
     dropout_random=0,
     global_random=0,
+    verbose=True,
 ):
     #
-    if video_count == 1:
-        print(f'**************** SOLE-R1 batch decoding for 1 video for {video_step_count} steps ****************')
-    else:
-        print(f'**************** SOLE-R1 batch decoding across {video_count} videos (in parallel) for {video_step_count} steps ****************')
+    if verbose:
+        if video_count == 1:
+            print(f'**************** SOLE-R1 batch decoding for 1 video for {video_step_count} steps ****************')
+        else:
+            print(f'**************** SOLE-R1 batch decoding across {video_count} videos (in parallel) for {video_step_count} steps ****************')
     # 
     if video_idx_list is None:
         video_idx_list = []
@@ -225,16 +227,19 @@ def sole_batch_decode(
                 if dropout_100:
                     try: 
                         if int(prev_answer) > 98:
-                            print(f"dropout_100 applied at video_step {video_step}, current_video_idx_list_idx {current_video_idx_list_idx}, prev_answer {prev_answer} will be set to empty string")
+                            if verbose:
+                                print(f"dropout_100 applied at video_step {video_step}, current_video_idx_list_idx {current_video_idx_list_idx}, prev_answer {prev_answer} will be set to empty string")
                             prev_answer = " "
                     except:
-                        print("could not convert prev_answer to int:", prev_answer)
+                        if verbose:
+                            print("could not convert prev_answer to int:", prev_answer)
                 if not prev_answer in [" "]:
                     if dropout_random > 0:
                         # get random float between 0 and 1
                         random_float = random.uniform(0, 1)
                         if random_float < dropout_random:
-                            print(f"dropout_random applied at video_step {video_step}, current_video_idx_list_idx {current_video_idx_list_idx}, prev_answer {prev_answer} will be set to empty string")
+                            if verbose:
+                                print(f"dropout_random applied at video_step {video_step}, current_video_idx_list_idx {current_video_idx_list_idx}, prev_answer {prev_answer} will be set to empty string")
                             prev_answer = " "
                 # 
                 replace_start = "The task progress for the previous timestep is "
@@ -269,10 +274,11 @@ def sole_batch_decode(
             )
             # len(outputs)
             if not len(outputs) == len(current_video_idx_batch_input):
-                print(retry_gen_count)
-                print(
-                    f"Outputs length {len(outputs)} is not equal to inputs length {len(current_video_idx_batch_input)}"
-                )
+                if verbose:
+                    print(retry_gen_count)
+                    print(
+                        f"Outputs length {len(outputs)} is not equal to inputs length {len(current_video_idx_batch_input)}"
+                    )
                 retry_gen_count = retry_gen_count + 1
                 # assert False, f"Outputs length {len(outputs)} is not equal to inputs length {len(current_video_idx_batch_input)}"
             else:
@@ -307,11 +313,12 @@ def sole_batch_decode(
         # sol_list_batch = sol_list_batch + [[example[answer_key] for example in example_list]]
         # print('')
         # print(current_video_idx_list)
-        print('********** video_step', video_step, '**********')
-        print('REASONING TRACES ACROSS VIDEOS:')
-        print(text_output_list_batch[-1])
-        print('PREDICTED PROGRESS ACROSS VIDEOS:')
-        print(prev_answer_batch[-1])
+        if verbose:
+            print('********** video_step', video_step, '**********')
+            print('REASONING TRACES ACROSS VIDEOS:')
+            print(text_output_list_batch[-1])
+            print('PREDICTED PROGRESS ACROSS VIDEOS:')
+            print(prev_answer_batch[-1])
         # print(sol_list_batch[-1])
         # len(prev_answer_batch)
         # prev_answer_batch[0]
@@ -528,7 +535,7 @@ def create_composite_frame( first_frame_wrist_view,
                         frame1_external_view,
                         use_two_timestep=True,
                            from_zero=False, 
-                           view_type=['external', 'wrist']):
+                           view_type='external and wrist'):
     size = 384
     padding = 5
     # 
@@ -537,24 +544,31 @@ def create_composite_frame( first_frame_wrist_view,
     imgs2 = [frame1_wrist_view, frame1_external_view]
     # 
     for i in range(len(first_imgs)):
-        first_imgs[i] = resize_with_padding(first_imgs[i], size)
-        imgs0[i] = resize_with_padding(imgs0[i], size)
-        imgs2[i] = resize_with_padding(imgs2[i], size)
+        if not first_imgs[i] is None:
+            first_imgs[i] = resize_with_padding(first_imgs[i], size)
+        if not imgs0[i] is None:
+            imgs0[i] = resize_with_padding(imgs0[i], size)
+        if not imgs2[i] is None:
+            imgs2[i] = resize_with_padding(imgs2[i], size)
     # 
     col_pad = np.zeros((size, padding, 3), dtype=np.uint8)
     external_view_idx = 1
     if not from_zero:
-        bottom_row = np.hstack([first_imgs[0], col_pad, imgs0[0], col_pad, imgs2[0]])
-        top_row = np.hstack([first_imgs[external_view_idx], col_pad, imgs0[external_view_idx], col_pad, imgs2[external_view_idx]])
+        if not first_imgs[0] is None:
+            bottom_row = np.hstack([first_imgs[0], col_pad, imgs0[0], col_pad, imgs2[0]])
+        if not first_imgs[external_view_idx] is None:
+            top_row = np.hstack([first_imgs[external_view_idx], col_pad, imgs0[external_view_idx], col_pad, imgs2[external_view_idx]])
     else:
-        bottom_row = np.hstack([first_imgs[0], col_pad, imgs2[0]])
-        top_row = np.hstack([first_imgs[external_view_idx], col_pad, imgs2[external_view_idx]])
+        if not first_imgs[0] is None:
+            bottom_row = np.hstack([first_imgs[0], col_pad, imgs2[0]])
+        if not first_imgs[external_view_idx] is None:
+            top_row = np.hstack([first_imgs[external_view_idx], col_pad, imgs2[external_view_idx]])
     full_width = top_row.shape[1]
     row_pad = np.zeros((padding, full_width, 3), dtype=np.uint8)
     #
-    if view_type == ['external']:
+    if view_type in ['external']:
         composite = top_row
-    elif view_type == ['wrist']:
+    elif view_type in ['wrist']:
         composite = bottom_row
     else:
         if use_two_timestep:
@@ -651,7 +665,7 @@ def load_model(model_path: str = None):
 
 # load_model()
 
-def sole(videos, task_description, view_type_per_video=None, context_window = ['current', 'previous', 'first'], model_path=None):
+def sole(videos, task_description, view_type_per_video=None, context_window = ['current', 'previous', 'first'], model_path=None, verbose=True):
     video_step_counts = [len(d) for d in videos]
     if len(set(video_step_counts)) != 1:
         logging.error(
@@ -664,10 +678,10 @@ def sole(videos, task_description, view_type_per_video=None, context_window = ['
     dataset_dict_list = []
     for video_idx in range(len(videos)):
         # 
-        if view_type_per_video[video_idx] == ['external and wrist']:
+        if view_type_per_video[video_idx] in ['external and wrist']:
             user_question_template_final = user_question_template
             user_question_from_zero_template_final = user_question_from_zero_template
-        elif view_type_per_video[video_idx] == ['wrist']:
+        elif view_type_per_video[video_idx] in ['wrist']:
             user_question_template_final = user_question_template_wrist_view
             user_question_from_zero_template_final = user_question_from_zero_template_wrist_view
         else:
@@ -676,6 +690,8 @@ def sole(videos, task_description, view_type_per_video=None, context_window = ['
         # 
         video = videos[video_idx]
         first_frame = video[0]
+        first_frame_wrist_view = None
+        first_frame_external_view = None
         frame_height, frame_width = first_frame.shape[:2]
         if view_type_per_video[video_idx] == 'external and wrist' or (view_type_per_video is None and frame_width == 2*frame_height):
             first_frame_external_view = first_frame[:, :first_frame.shape[1]//2, :]
@@ -717,7 +733,7 @@ def sole(videos, task_description, view_type_per_video=None, context_window = ['
     # test_image = load_image(dataset_dict_list[0]['image'])
     # test_image.save('/data/sls/scratch/pschro/sole/test_image.jpg')
     # 
-    text_input_list_batch, text_output_list_batch, example_list_batch, answer_list_batch = sole_batch_decode(processing_class, processor, llm, sampling_params, dataset_dict_list, video_count, video_step_count,)
+    text_input_list_batch, text_output_list_batch, example_list_batch, answer_list_batch = sole_batch_decode(processing_class, processor, llm, sampling_params, dataset_dict_list, video_count, video_step_count,verbose=verbose)
     # 
     text_output_list_list, text_input_list_list, example_list_list, answer_list_list = get_output_across_videos(video_count, text_input_list_batch, text_output_list_batch, example_list_batch, answer_list_batch )
     # 

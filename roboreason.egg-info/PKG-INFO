@@ -15,30 +15,17 @@ Requires-Dist: datasets>=3.2.0
 Requires-Dist: trl
 Requires-Dist: imageio
 Requires-Dist: matplotlib
-Requires-Dist: av>=16.0.0
+Requires-Dist: av<16.0.0,>=15.0.0
 Requires-Dist: openai
 Requires-Dist: google-genai
-Provides-Extra: robometer
-Requires-Dist: omegaconf>=2.3.0; extra == "robometer"
-Requires-Dist: hydra-core; extra == "robometer"
-Requires-Dist: tensorboard; extra == "robometer"
-Requires-Dist: peft; extra == "robometer"
-Requires-Dist: codetiming>=1.4.0; extra == "robometer"
-Requires-Dist: unsloth>=2025.10; extra == "robometer"
-Requires-Dist: sentence-transformers>=2.0.0; extra == "robometer"
-Requires-Dist: decord>=0.6.0; extra == "robometer"
-Provides-Extra: lerobot
-Requires-Dist: lerobot; extra == "lerobot"
-Provides-Extra: all
-Requires-Dist: omegaconf>=2.3.0; extra == "all"
-Requires-Dist: hydra-core; extra == "all"
-Requires-Dist: tensorboard; extra == "all"
-Requires-Dist: peft; extra == "all"
-Requires-Dist: codetiming>=1.4.0; extra == "all"
-Requires-Dist: unsloth>=2025.10; extra == "all"
-Requires-Dist: sentence-transformers>=2.0.0; extra == "all"
-Requires-Dist: decord>=0.6.0; extra == "all"
-Requires-Dist: lerobot; extra == "all"
+Requires-Dist: omegaconf>=2.3.0
+Requires-Dist: hydra-core
+Requires-Dist: tensorboard
+Requires-Dist: peft
+Requires-Dist: codetiming>=1.4.0
+Requires-Dist: sentence-transformers>=2.0.0
+Requires-Dist: decord>=0.6.0
+Requires-Dist: lerobot>=0.4.4
 
 
 <div align="center">
@@ -130,7 +117,7 @@ python -c "from roboreason.utils.model_utils import get_model_dir; get_model_dir
 # pip install -U roboreason
 import roboreason as rr
 
-video_paths = ['../test_videos/robosuite/robosuite_lift_example_00.mp4']
+video_paths = ['test_videos/robosuite/robosuite_lift_example_00.mp4']
 task_description="Pick up the cube from the table."
 
 # Robometer
@@ -141,7 +128,7 @@ output_robometer = {"model": "robometer", "rewards": rewards[0]}
 rewards, reasoning_traces = rr.generate(model="sole-r1",  task_description=task_description, video_paths=video_paths, view_type_per_video=['external and wrist'])
 output_sole = {"model": "sole-r1", "rewards": rewards[0], "reasoning_traces": reasoning_traces[0]}
 
-rr.video_plot(outputs=[output_sole, output_robometer], plot_save_path='../model_outputs/combined/robosuite_lift_example_00.mp4', video_path = video_paths[0])
+rr.video_plot(outputs=[output_sole, output_robometer], plot_save_path='model_outputs/combined/robosuite_lift_example_00.mp4', video_path = video_paths[0])
 
 ```
 
@@ -156,7 +143,7 @@ import roboreason as rr
 rewards, success_probs = rr.generate(
     model="robometer",  
     task_description="Pick up the cube from the table.", 
-    video_paths=['../test_videos/robosuite/robosuite_lift_example_00.mp4'], 
+    video_paths=['test_videos/robosuite/robosuite_lift_example_00.mp4'], 
     view_type_per_video=['external']
 )
 
@@ -170,7 +157,7 @@ import roboreason as rr
 rewards, reasoning_traces = rr.generate(
     model="sole-r1",  
     task_description="Pick up the cube from the table.", 
-    video_paths=['../test_videos/robosuite/robosuite_lift_example_00.mp4'], 
+    video_paths=['test_videos/robosuite/robosuite_lift_example_00.mp4'], 
     view_type_per_video=['external and wrist']
 )
 ```
@@ -184,7 +171,7 @@ import roboreason as rr
 rewards = rr.generate(
     model="topreward",  
     task_description="Pick up the cube from the table.", 
-    video_paths=['../test_videos/robosuite/robosuite_lift_example_00.mp4'], 
+    video_paths=['test_videos/robosuite/robosuite_lift_example_00.mp4'], 
     view_type_per_video=['external']
 )
 
@@ -198,7 +185,7 @@ import roboreason as rr
 rewards = rr.generate(
     model="roboreward",  
     task_description="Pick up the cube from the table.", 
-    video_paths=['../test_videos/robosuite/robosuite_lift_example_00.mp4'], 
+    video_paths=['test_videos/robosuite/robosuite_lift_example_00.mp4'], 
     view_type_per_video=['external']
 )
 
@@ -215,7 +202,7 @@ API_KEY = "..."
 rewards, reasoning_traces = rr.generate(
     model="gpt-5",  
     task_description="Pick up the cube from the table.", 
-    video_paths=['../test_videos/robosuite/robosuite_lift_example_00.mp4'], 
+    video_paths=['test_videos/robosuite/robosuite_lift_example_00.mp4'], 
     view_type_per_video=['external'], 
     key=API_KEY
 )
@@ -232,7 +219,7 @@ API_KEY = "..."
 rewards, reasoning_traces = rr.generate(
     model="gemini-3-pro-preview",  
     task_description="Pick up the cube from the table.", 
-    video_paths=['../test_videos/robosuite/robosuite_lift_example_00.mp4'], 
+    video_paths=['test_videos/robosuite/robosuite_lift_example_00.mp4'], 
     view_type_per_video=['external'], 
     key=API_KEY
 )
@@ -253,8 +240,8 @@ output_sole = {"model": "sole-r1", "rewards": rewards[0], "reasoning_traces": re
 
 rr.video_plot(
     outputs=[output_sole, output_robometer], 
-    plot_save_path='../model_outputs/combined/robosuite_lift_example_00.mp4', 
-    video_path = '../test_videos/robosuite/robosuite_lift_example_00.mp4'
+    plot_save_path='model_outputs/combined/robosuite_lift_example_00.mp4', 
+    video_path = 'test_videos/robosuite/robosuite_lift_example_00.mp4'
 )
 ```
 

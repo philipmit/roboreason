@@ -5,6 +5,8 @@ import cv2
 from PIL import Image
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import json
+
 
 
 def load_video_frames(video_path):
@@ -52,6 +54,7 @@ def generate(
     ###### optional, for local models
     model_path: str = None,
     ######
+    verbose: bool = True,
 ):
     # 
     global CURRENT_MODEL
@@ -94,6 +97,13 @@ def generate(
             single_video = False
         else:
             single_video = True
+        # 
+        if view_type_per_video is None and view_type is not None:
+            if single_video:
+                view_type_per_video = [view_type]
+            else:
+                view_type_per_video = [view_type] * len(video_frames)
+        # 
     elif video_frames_external is not None or video_frames_wrist is not None:
         if video_frames_external is not None:
             if isinstance(video_frames_external[0], list):
@@ -105,6 +115,12 @@ def generate(
                 single_video = False
             else:
                 single_video = True
+        # 
+        if view_type_per_video is None and view_type is not None:
+            if single_video:
+                view_type_per_video = [view_type]
+            else:
+                view_type_per_video = [view_type] * max([len(video_frames_external or []), len(video_frames_wrist or [])])
     else:
         if video_paths is None and video_path is not None:
             video_paths = [video_path]
@@ -204,7 +220,7 @@ def generate(
     # 
     if not model in ['sole-r1']:
         frame_height, frame_width = downsampled_videos[0][0].shape[:2]
-        if 'test_videos' in video_path:
+        if video_path is not None and 'test_videos' in video_path:
             if frame_width == 2*frame_height:
                 for video_idx in range(len(downsampled_videos)):
                     frames_final=[]
@@ -213,13 +229,6 @@ def generate(
                     # 
                     downsampled_videos[video_idx] = frames_final
     ############ GENERATE REWARD AND REASONING TRACES FOR EACH VIDEO
-    # input_data = {
-    #     'task_description': task_description,
-    #     'video_path': video_path,
-    #     'context_window': context_window,
-    #     'num_reasoning_frames': num_reasoning_frames,
-    #     'view_type_per_video': view_type_per_video
-    # }
     success_probs = None
     reasoning_traces = None
     rewards = None
@@ -239,20 +248,34 @@ def generate(
         from roboreason.sole import sole
         # from sole import load_model
         # load_model()
-        rewards, reasoning_traces = sole(downsampled_videos, task_description, view_type_per_video=view_type_per_video, context_window=['current', 'previous', 'first'], model_path=model_path)
-        # >>> rewards
-        # [[0, 1, 0, 14, 16, 12, 7, 2, 0, -6]]
-        # >>> reasoning_traces
-        # [['', '<think>At the previous timestep, the gripper hovered over the table with the cube a short distance ahead and no contact made. At the current timestep, the gripper has moved slightly closer toward the cube and appears better aligned, but it still has not touched or grasped the cube. This small approach indicates incremental progress relative to the previous timestep. Given a previous progress of 0% and this minor closing of the gap, the current progress is predicted to be about 1%. To complete the task, the robot must continue approaching, align over the cube, close the gripper to secure it, and lift it off the table.</think><answer>1%</answer>', '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved further from the cube compared to the previous timestep. Therefore, the task progress appears to be decreasing. Given that the previous task progress was 1%, the current task progress seems to have decreased to 0%.</think><answer>0%</answer>', '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved closer to the cube compared to the previous timestep. Therefore, the task progress appears to be increasing. Given that the previous task progress was 0%, the current task progress seems to have increased to 14%.</think><answer>14%</answer>', '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved closer to the cube compared to the previous timestep. Therefore, the task progress appears to be increasing. Given that the previous task progress was 14%, the current task progress seems to have increased to 16%.</think><answer>16%</answer>', '<think>At the previous timestep, the gripper was hovering near the cube on the table and appeared roughly aligned to approach it. At the current timestep, the gripper has shifted away from the cube and is not making contact, so it is farther from initiating a grasp than before. Because the end-effector moved away rather than closing in, progress likely decreased; given the previous progress of 16%, I would predict the current progress to be about 12%. To complete the task, the robot still needs to move closer to the cube, align the gripper around it, close the fingers to secure the cube, and lift it from the table.</think><answer>12%</answer>', '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved further from the cube compared to the previous timestep. Therefore, the task progress appears to be decreasing. Given that the previous task progress was 12%, the current task progress seems to have decreased to 7%.</think><answer>7%</answer>', '<think>In the previous timestep, the cube sits on the table and the gripper is nearer to it, roughly aligned but not in contact. In the current timestep, the gripper has moved farther from the cube and remains open, so no grasp has been initiated and the cube is still resting on the table. Because the end-effector has increased its distance from the target, progress toward picking up the cube is decreasing relative to the previous timestep. Given a previous progress of 7%, this regression suggests the current progress is around 2%. To complete the task, the robot must re-approach the cube, align the gripper over it, close to grasp, and lift it off the table.</think><answer>2%</answer>', '<think>At the previous timestep, the gripper was hovering over the table and relatively near the cube but had not made contact. At the current timestep, the gripper has rotated and shifted slightly farther from the cube, still open and empty, indicating it moved away rather than toward a grasp. This suggests regression in the attempt to pick up the cube; given the previous progress of 2%, I would predict the current progress to be around 0%. To complete the task, the robot needs to approach the cube, align the gripper above it, close to grasp it, and lift it off the table.</think><answer>0%</answer>', '<think>At the previous timestep, the cube sits on the table while the gripper hovers nearby without contact. At the current timestep, the gripper has shifted slightly upward and away from the cube, increasing the distance and still showing no grasp. This motion moves the robot away from initiating a pickup, so given the previous progress of 0%, I would predict the current progress has decreased slightly to about -6%. To complete the task, the gripper needs to move back toward the cube, align over it, close to secure the cube, and lift it from the table.</think><answer>-6%</answer>']]
-        # >>> rewards
-        # [[0, 2, 3, 15, 17, 16, 9, 2, -1, -7]]
-        # >>> reasoning_traces
-        # [['', "<think>At the previous timestep, the gripper was hovering farther from the red cube with a noticeable gap and no contact. At the current timestep, the arm has moved closer and slightly lower toward the cube, while the cube remains on the table and the gripper still hasn't touched it. Given the previous progress of 0%, this small approach indicates increasing progress; I would predict the current progress to be about 2%. To finish the task, the robot must align over the cube, close the gripper to grasp it, and lift it off the table.</think><answer>2%</answer>", '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved closer to the cube compared to the previous timestep. Therefore, the task progress appears to be increasing. Given that the previous task progress was 2%, the current task progress seems to have increased to 3%.</think><answer>3%</answer>', '<think>At the previous timestep, the gripper was hovering above the table with the cube clearly visible below and some lateral offset from it. At the current timestep, the gripper has moved closer toward the cube and appears better aligned above it, but it is still open and has not made contact or lifted the cube. This approach indicates increasing progress relative to the previous timestep; given the earlier estimate of 3%, the observed closing of the distance and improved alignment suggests the current progress is likely around 15%. To complete the task, the robot still needs to finish positioning directly over the cube, descend to an appropriate grasp pose, close the gripper to secure the cube, and then lift it from the table.</think><answer>15%</answer>', '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved closer to the cube compared to the previous timestep. Therefore, the task progress appears to be increasing. Given that the previous task progress was 15%, the current task progress seems to have increased to 17%.</think><answer>17%</answer>', '<think>In the previous timestep, the gripper is hovering above the table with the cube clearly on the surface, and there is no contact. In the current timestep, the gripper has moved slightly farther away from the cube and remains open, so it is less aligned for a grasp than before. Given that the previous task progress was 17%, this increased distance suggests a small setback; I would predict the current progress to be about 16%. To complete the task, the robot still needs to re-approach the cube, align the gripper around it, close to secure a grasp, and then lift it from the table.</think><answer>16%</answer>', '<think>At the previous timestep, the gripper hovered over the table near the cube with the fingers open and no contact. At the current timestep, the arm has rotated and shifted slightly away from the cube, increasing the distance and still not making contact. Because the end effector moved farther from the target, progress toward picking up the cube is likely decreasing; given a previous progress of 16%, I would predict the current progress to be around 9%. To complete the task, the robot needs to re-approach the cube, align above it, close the gripper to secure it, and lift it off the table.</think><answer>9%</answer>', '<think>In the previous timestep, the gripper was positioned closer to the cube on the table and roughly aligned for an approach, but it had not made contact. In the current timestep, the gripper has rotated and moved farther from the cube, increasing the gap and still showing no grasp. Because the end-effector is retreating rather than closing in, the task appears to be regressing; given a previous progress of 9%, I would predict the current progress to be around 2%. To complete the task, the robot needs to re-approach the cube, align the gripper above it, descend, close the fingers to secure the cube, and lift it off the table.</think><answer>2%</answer>', '<think>At both the previous and current timestep, the gripper has not picked up or made contact with the cube. The current timestep shows that the gripper has moved further from the cube compared to the previous timestep. Therefore, the task progress appears to be decreasing. Given that the previous task progress was 2%, the current task progress seems to have decreased to -1%.</think><answer>-1%</answer>', '<think>At the previous timestep, the open gripper hovered near the cube on the table without making contact. At the current timestep, the arm has shifted slightly away from the cube, increasing the distance, and the gripper remains open with no contact. Because the end-effector is moving farther from the target instead of approaching or grasping it, progress is decreasing; given the previous progress of -1%, I would predict the current progress to be around -7%. To complete the task, the robot needs to move back toward the cube, align the gripper around it, close to secure a grasp, and lift it off the table.</think><answer>-7%</answer>']]
-    # 
+        # rewards, reasoning_traces = sole(downsampled_videos, task_description, view_type_per_video=view_type_per_video, context_window=['current', 'previous', 'first'], model_path=model_path)
+        if len(downsampled_videos)>5:
+            # 
+            lst=downsampled_videos
+            size=5
+            downsampled_videos_chunks_max_5 = [lst[i:i+size] for i in range(0, len(lst), size)]
+            view_type_per_video_chunks_max_5 = [view_type_per_video[i:i+size] for i in range(0, len(view_type_per_video), size)]
+        else:
+            downsampled_videos_chunks_max_5 = [downsampled_videos]
+            view_type_per_video_chunks_max_5 = [view_type_per_video]
+        # 
+        rewards = []
+        reasoning_traces = []
+        for chunk_idx in range(len(downsampled_videos_chunks_max_5)):
+            if verbose: 
+                print(f"Generating rewards for batch {chunk_idx+1}/{len(downsampled_videos_chunks_max_5)} of videos (batch size = {size}) using SOLE-R1")
+            downsampled_videos_chunk = downsampled_videos_chunks_max_5[chunk_idx]
+            view_type_per_video_chunk = view_type_per_video_chunks_max_5[chunk_idx]
+            rewards_chunk, reasoning_traces_chunk = sole(downsampled_videos_chunk, task_description, view_type_per_video=view_type_per_video_chunk, context_window=['current', 'previous', 'first'], model_path=model_path, verbose=verbose)
+            rewards += rewards_chunk
+            reasoning_traces += reasoning_traces_chunk
+        # 
     elif model in ['topreward']:
         from roboreason.topreward import topreward
         rewards = []
         for video_idx in range(len(downsampled_videos)):
+            if verbose: 
+                print(f"Generating rewards for video {video_idx+1}/{len(downsampled_videos)} using TOPReward...")
             rewards_video_i = topreward(downsampled_videos[video_idx], task_description, model_path=model_path)
             rewards.append(rewards_video_i)
     # 
@@ -260,6 +283,8 @@ def generate(
         from roboreason.roboreward import roboreward, RoboRewardModel
         rewards = []
         for video_idx in range(len(downsampled_videos)):
+            if verbose: 
+                print(f"Generating rewards for video {video_idx+1}/{len(downsampled_videos)} using RoboReward...")
             if model_path is None:
                 rewards_video_i = roboreward(downsampled_videos[video_idx], task_description)
             else:
@@ -273,6 +298,8 @@ def generate(
         success_probs = []
         # for video_path in video_paths:
         for video_idx in range(len(downsampled_videos)):
+            if verbose: 
+                print(f"Generating rewards for video {video_idx+1}/{len(downsampled_videos)} using Robometer...")
             # rewards_video_i, success_probs_video_i = robometer(video_path, task_description)
             rewards_video_i, success_probs_video_i = robometer(downsampled_videos[video_idx], task_description, model_path=model_path)
             rewards.append(rewards_video_i)
@@ -336,6 +363,244 @@ def generate(
             return full_rewards[0]
 
 
+def extract_annotation(lerobot_dataset, model, annotation_version=None, annotation_subdir=None):
+    # 
+    if annotation_version is None:
+        annotation_version = "v1"
+    # 
+    if annotation_subdir is None:
+        annotation_subdir = lerobot_dataset.root / "with_reward"
+    # 
+    if not os.path.exists(annotation_subdir):
+        raise ValueError(f"Expected annotation subdir {annotation_subdir} does not exist")
+    # 
+    import pandas as pd
+    # parquet_path = os.path.join(lerobot_dataset.root, "data/chunk-000/file-000.parquet")
+    parquet_path = os.path.join(annotation_subdir, "data/chunk-000/file-000.parquet")
+    df = pd.read_parquet(parquet_path)
+    episode_lengths = df.groupby("episode_index").size().values
+    # 
+    rewards_by_episode = []
+    current_episode = []
+    episode_id = 0
+    step_counter = 0
+    reward_column_name = f"rewards_{model}_{annotation_version}"
+    rewards_column = df[reward_column_name].values
+    # len(rewards_column)
+    # 
+    for i in range(len(rewards_column)):
+        current_episode.append(rewards_column[i])
+        step_counter += 1
+        if step_counter == episode_lengths[episode_id]:
+            rewards_by_episode.append(np.array(current_episode).tolist())
+            current_episode = []
+            step_counter = 0
+            episode_id += 1
+    # 
+    return rewards_by_episode
+
+def extract_frames(lerobot_dataset, observation_name=None):
+    if observation_name is None:
+        observation_name = set_observation_name(video_paths)
+    # 
+    paths = lerobot_dataset.get_episodes_file_paths()
+    video_paths = [p for p in paths if p.endswith(".mp4")]
+    video_paths = [os.path.join(lerobot_dataset.root, p) for p in video_paths]
+    # 
+    import pandas as pd
+    parquet_path = os.path.join(lerobot_dataset.root, "data/chunk-000/file-000.parquet")
+    df = pd.read_parquet(parquet_path)
+    episode_lengths = df.groupby("episode_index").size().values
+    # 
+    import av
+    frames_by_episode = []
+    current_episode = []
+    episode_id = 0
+    frame_counter = 0
+    for video_path_idx in range(len(video_paths)):
+        if observation_name in video_paths[video_path_idx]:
+            container = av.open(video_paths[video_path_idx])
+            for frame in container.decode(video=0):
+                img = frame.to_ndarray(format="rgb24")
+                current_episode.append(img)
+                frame_counter += 1
+                if frame_counter == episode_lengths[episode_id]:
+                    frames_by_episode.append(current_episode)
+                    current_episode = []
+                    frame_counter = 0
+                    episode_id += 1
+                    # break
+    # 
+    return frames_by_episode
+
+def set_observation_name(video_paths):
+    if any('observation.images.side' in x for x in video_paths):
+        observation_name = 'observation.images.side'
+    elif any('observation.images.top' in x for x in video_paths):
+        observation_name = 'observation.images.top'
+    else:
+        observation_name = video_paths[0].split('videos/')[-1].split('/')[0]
+    return observation_name
+
+
+def annotate(
+    model: str,
+    task_description: str,
+    lerobot_dataset,
+    observation_name: str = None,
+    annotation_version: str = None,
+    num_reasoning_frames: int = 10,
+    context_window: str = None,
+    ###### for API-based models
+    key: str = None,
+    ######
+    ###### optional, for local models
+    model_path: str = None,
+    annotation_subdir = None,
+    verbose: bool = True,
+):
+    paths = lerobot_dataset.get_episodes_file_paths()
+    video_paths = [p for p in paths if p.endswith(".mp4")]
+    video_paths = [os.path.join(lerobot_dataset.root, p) for p in video_paths]
+    # 
+    if observation_name is None:
+        observation_name = set_observation_name(video_paths)
+    # 
+    if 'wrist' in observation_name:
+        view_type = 'wrist'
+    else:
+        view_type = 'external'
+    # 
+    if annotation_version is None:
+        annotation_version = "v1"
+    # 
+    if annotation_subdir is None:
+        annotation_subdir = lerobot_dataset.root / "with_reward"
+    # 
+    import av
+    frames_by_episode = extract_frames(lerobot_dataset=lerobot_dataset, observation_name=observation_name)
+    # 
+    if verbose:
+        print(f"Extracted frames for {len(frames_by_episode)} episodes with observation name '{observation_name}' and view type '{view_type}'")
+    # 
+    rewards = None
+    reasoning_traces = None
+    success_probs = None
+    if model in ["roboreward", "topreward"]:
+        rewards = generate(
+            model=model,  
+            task_description=task_description, 
+            video_frames=frames_by_episode, 
+            view_type=view_type, 
+            num_reasoning_frames=num_reasoning_frames,
+        )
+    elif model in ["robometer"]:
+        rewards, success_probs = generate(
+            model=model,  
+            task_description=task_description, 
+            video_frames=frames_by_episode, 
+            view_type=view_type, 
+            num_reasoning_frames=num_reasoning_frames,
+        )
+    elif model in ["sole-r1"]:
+        rewards, reasoning_traces = generate(
+            model=model,  
+            task_description=task_description, 
+            video_frames=frames_by_episode, 
+            view_type=view_type, 
+            num_reasoning_frames=num_reasoning_frames,
+        )
+    elif "gpt" in model or "gemini" in model:
+        rewards, reasoning_traces = generate(
+            model=model,  
+            task_description=task_description, 
+            video_frames=frames_by_episode, 
+            view_type=view_type, 
+            num_reasoning_frames=num_reasoning_frames,
+            key=key
+        )
+    # 
+    # convert rewards to numpy array and flatten to 1D array of length num_frames
+    # reward_values = np.concatenate(rewards).astype(np.float32)
+    reward_values = np.concatenate(rewards).astype(np.float32).reshape(-1, 1)
+    # reward_values = np.random.randn(num_frames, 1).astype(np.float32)
+    # reward_values.shape
+    # 
+    reward_column_name = f"rewards_{model}_{annotation_version}"
+    reward_feature_info = {
+        "dtype": "float32",
+        "shape": (1,),
+        "names": None,
+    }
+    features = {
+        reward_column_name: (reward_values, reward_feature_info),
+    }
+    # if not reasoning_traces is None:
+    #     reasoning_traces_column_name = f"reasoning_traces_{model}_{annotation_version}"
+    # if not success_probs is None:
+    #     success_probs_column_name = f"success_probs_{model}_{annotation_version}"
+    # 
+    from lerobot.datasets.dataset_tools import add_features
+    num_frames = lerobot_dataset.meta.total_frames
+    # 
+    if verbose:
+        print(f"Adding reward annotations to dataset with {num_frames} frames using feature name '{reward_column_name}'")
+        print(f"Output directory: {str(annotation_subdir)}")
+    # 
+    # if annotation_subdir already exists, read this as current dataset
+    # if os.path.exists(annotation_subdir):
+    #     from lerobot.datasets.lerobot_dataset import LeRobotDataset
+    #     current_dataset = LeRobotDataset(annotation_subdir, video_backend="pyav")
+    # else:
+    #     current_dataset = lerobot_dataset
+    # 
+    # if os.path.exists('/data/sls/scratch/pschro/.cache/huggingface/lerobot/jackvial/so101_pickplace_recap_merged_v2/with_reward'):
+    if os.path.exists(annotation_subdir):
+        # mkdir annotation_subdir_tmp
+        import shutil
+        if os.path.exists(f"{annotation_subdir}_tmp"):
+            shutil.rmtree(f"{annotation_subdir}_tmp")
+        shutil.move(annotation_subdir, f"{annotation_subdir}_tmp")
+        # 
+        from lerobot.datasets.lerobot_dataset import LeRobotDataset
+        current_dataset = LeRobotDataset(f"{annotation_subdir}_tmp", video_backend="pyav")
+        # 
+        import pandas as pd
+        current_df = pd.read_parquet(os.path.join(current_dataset.root, "data/chunk-000/file-000.parquet"))
+        # if reward_column_name already exists in current_df, remove it and save the modified parquet file back to disk
+        if reward_column_name in current_df.columns:
+            current_df = current_df.drop(columns=[reward_column_name])
+            current_df.to_parquet(os.path.join(current_dataset.root, "data/chunk-000/file-000.parquet"), index=False)
+        # 
+        # f"{annotation_subdir}_tmp" -> annotation_subdir
+        new_dataset = add_features(
+            dataset=current_dataset,
+            features=features,
+            # output_dir=sample_dataset.root / "with_reward",
+            output_dir = annotation_subdir
+            # output_dir = f'{str(annotation_subdir)}_tmp'
+        )
+        # move the new dataset to the original with_reward directory
+        # os.system(f"rm -rf {str(annotation_subdir)}")
+        # os.system(f"mv {str(annotation_subdir)}_tmp {str(annotation_subdir)}")
+        # change the new dataset root to the original with_reward directory
+        new_dataset.root = str(annotation_subdir)
+    else:
+        current_dataset = lerobot_dataset
+        # original dir -> annotation_subdir
+        new_dataset = add_features(
+            dataset=current_dataset,
+            features=features,
+            output_dir=annotation_subdir,
+        )
+    # new_dataset.root
+    # 
+    assert reward_values.shape[0] == num_frames, f"Number of reward values {reward_values.shape[0]} does not match number of frames {num_frames}"
+    assert reward_column_name in new_dataset.meta.features
+    assert new_dataset.meta.features[reward_column_name] == reward_feature_info
+    assert len(new_dataset) == num_frames
+
+
 def shape_to_target(frame, target=384):
     frame_height, frame_width = frame.shape[:2]
     if frame_height > target:
@@ -346,8 +611,10 @@ def shape_to_target(frame, target=384):
         frame = cv2.copyMakeBorder(frame, 0, 0, (target-frame_width)//2, (target-frame_width)//2, cv2.BORDER_CONSTANT, value=[255, 255, 255])
     return frame
 
+
 def video_plot(outputs, plot_save_path, video_path=None, video_view_external_path=None, video_view_wrist_path=None, video_frames=None, view_type=None, show_all_frames=False,
-               fps_=2, wrap_width=26, font_scale=1, font_height=30, text_thickness=2, line_type=2, show_reasoning_traces=True, cfg=None, env_rew_lab='Ground-truth reward'):
+               fps_=2, wrap_width=26, font_scale=1, font_height=30, text_thickness=2, line_type=2, show_reasoning_traces=True, cfg=None, env_rew_lab='Ground-truth reward', 
+               save_json = True):
     # 
     ############ EXTRACT VIDEO FRAMES FOR ALL VIDEOS AS A LIST OF LISTS    
     # 
@@ -439,6 +706,13 @@ def video_plot(outputs, plot_save_path, video_path=None, video_view_external_pat
         output_height = frame_height
         # 
         print('output_width, output_height:', output_width, output_height)
+        # plot_save_path = "/data/sls/scratch/pschro/roboreason/test_videos/lerobot/jackvial_so101_pickplace_recap_merged_v2/observation_images_top_episode_{episode_idx}.mp4"
+        json_save_path = plot_save_path.rsplit('.', 1)[0] + '.json'
+        if save_json:
+            if not os.path.exists(os.path.dirname(json_save_path)):
+                os.makedirs(os.path.dirname(json_save_path))
+            with open(json_save_path, 'w') as f:
+                json.dump(outputs, f)
         if plot_save_path.endswith(".mp4"):
             plot_save_path = plot_save_path.replace(".mp4", ".avi")
         # 
