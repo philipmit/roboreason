@@ -31,25 +31,14 @@ rewards_topreward = rr.extract_annotation(lerobot_dataset=dataset, model="toprew
 
 
 plot_save_name_base = dataset_name.replace('/', '_')
+plot_save_dir = f"../model_outputs/combined/lerobot/{plot_save_name_base}/"
 for video_idx in range(len(video_frames)):
-    output_sole = {"model": "sole-r1", "rewards": rewards_sole[video_idx]}
-    plot_save_dir = f"../model_outputs/sole-r1/lerobot/{plot_save_name_base}/"
-    rr.video_plot(outputs=[output_sole], plot_save_path=plot_save_dir + f"{plot_save_name_base}_episode_{video_idx}.mp4", video_frames=video_frames[video_idx], view_type='external', show_reasoning_traces=False, show_all_frames=False, fps_=10)
-    # 
-    output_robometer = {"model": "robometer", "rewards": rewards_robometer[video_idx]}
-    plot_save_dir = f"../model_outputs/robometer/lerobot/{plot_save_name_base}/"
-    rr.video_plot(outputs=[output_robometer], plot_save_path=plot_save_dir + f"{plot_save_name_base}_episode_{video_idx}.mp4", video_frames=video_frames[video_idx], view_type='external', show_reasoning_traces=False, show_all_frames=False, fps_=10)
-    # 
-    output_roboreward = {"model": "roboreward", "rewards": rewards_roboreward[video_idx]}
-    plot_save_dir = f"../model_outputs/roboreward/lerobot/{plot_save_name_base}/"
-    rr.video_plot(outputs=[output_roboreward], plot_save_path=plot_save_dir + f"{plot_save_name_base}_episode_{video_idx}.mp4", video_frames=video_frames[video_idx], view_type='external', show_reasoning_traces=False, show_all_frames=False, fps_=10)
-    # 
-    output_topreward = {"model": "topreward", "rewards": rewards_topreward[video_idx]}
-    plot_save_dir = f"../model_outputs/topreward/lerobot/{plot_save_name_base}/"
-    rr.video_plot(outputs=[output_topreward], plot_save_path=plot_save_dir + f"{plot_save_name_base}_episode_{video_idx}.mp4", video_frames=video_frames[video_idx], view_type='external', show_reasoning_traces=False, show_all_frames=False, fps_=10)
-    # 
-    output_combined = [output_robometer, output_sole, output_roboreward, output_topreward]
-    plot_save_dir = f"../model_outputs/combined/lerobot/{plot_save_name_base}/"
+    output_combined = [
+        {"model": "robometer", "rewards": rewards_robometer[video_idx]}, 
+        {"model": "sole-r1", "rewards": rewards_sole[video_idx]}, 
+        {"model": "roboreward", "rewards": rewards_roboreward[video_idx]}, 
+        {"model": "topreward", "rewards": rewards_topreward[video_idx]}
+    ]
     rr.video_plot(outputs=output_combined, plot_save_path=plot_save_dir + f"{plot_save_name_base}_episode_{video_idx}.mp4", video_frames=video_frames[video_idx], view_type='external', show_reasoning_traces=False, show_all_frames=False, fps_=10)
 
 ```
